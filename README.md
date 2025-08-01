@@ -1,1 +1,1 @@
-# LibGinie-A-Library-Management-System
+# LibGinie: A Library Management System
