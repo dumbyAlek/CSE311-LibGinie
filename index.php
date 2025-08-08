@@ -90,8 +90,8 @@
         <h1 class="title">LibGinie</h1>
         <p class="subtitle">Your Smart Digital Library Companion</p>
         <div>
-          <a href="pages/loginn.html" class="btn btn-primary btn-custom me-3">Login</a>
-          <a href="pages/singup.html" class="btn btn-outline-light btn-custom">Sign Up</a>
+          <a href="pages/loginn.php" class="btn btn-primary btn-custom me-3">Login</a>
+          <a href="pages/signup.php" class="btn btn-outline-light btn-custom">Sign Up</a>
         </div>
       </div>
     </div>
