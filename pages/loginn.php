@@ -1,3 +1,7 @@
+<?php
+// Start the session to access session variables like login errors
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,14 +9,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>LibGinie - Login</title>
 
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 
-  <!-- Google Fonts: Cinzel Decorative + I Love Ya as Sister -->
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=ILoveYaAsSister&display=swap" rel="stylesheet" />
-  
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=ILoveYaAsSister&display=swap" rel="stylesheet" />
+
   <style>
-    html, body {
+  html, body {
       height: 100%;
       margin: 0;
       font-family: 'I Love Ya as Sister', cursive;
@@ -22,7 +24,7 @@
       justify-content: center;
       align-items: center;
       color: #A6674C;
-    }
+      }
 
     .login-container {
       background-color: rgba(255, 255, 255, 0.95);
@@ -70,10 +72,10 @@
       color: white;
     }
 
-    .btn-login {
+      .btn-login {
       background-color: #A6674C;
     }
-    .btn-login:hover {
+      .btn-login:hover {
       background-color: #8c5633;
     }
 
@@ -91,32 +93,45 @@
       font-family: 'I Love Ya as Sister', cursive;
       font-size: 1rem;
       color: #7a5a3c;
-    }
+      }
 
-    .signup-link {
+      .signup-link {
       font-family: 'I Love Ya as Sister', cursive;
       font-size: 1.1rem;
       color: #7a5a3c;
       margin-top: 10px;
-    }
+      }
 
-    .signup-link a {
+      .signup-link a {
       color: #A6674C;
       text-decoration: none;
       font-weight: 700;
-      margin-left: 4px;
+    margin-left: 4px;
     }
 
     .signup-link a:hover {
       text-decoration: underline;
+    }
+
+    .alert {
+        margin-bottom: 15px;
+        font-family: 'I Love Ya as Sister', cursive;
     }
   </style>
 </head>
 <body>
 
   <div class="login-container" role="main">
+    <?php
+    // Check for and display any login errors
+    if (isset($_SESSION['login_error'])) {
+        echo '<div class="alert alert-danger" role="alert">' . htmlspecialchars($_SESSION['login_error']) . '</div>';
+        // Clear the error after displaying it
+        unset($_SESSION['login_error']); 
+    }
+    ?>
     <h2>Login</h2>
-    <form action="login_process.php" method="POST">
+        <form action="../backend/login_process.php" method="POST">
       <div class="mb-3 text-start">
         <label for="email" class="form-label">Email</label>
         <input type="email" id="email" name="email" class="form-control" required autofocus />
@@ -129,15 +144,15 @@
 
       <div class="show-pass-container">
         <input type="checkbox" id="showPassword" onchange="togglePassword()" />
-        <label for="showPassword">Show Password</label>
+      <label for="showPassword">Show Password</label>
       </div>
 
       <button type="submit" class="btn-login" aria-label="Login">Login</button>
       <button type="button" class="btn-guest" onclick="guestLogin()" aria-label="Login as Guest">Login as Guest</button>
     </form>
 
-    <div class="signup-link">
-      No account? <a href="../pages/singup.html">Sign up now</a>
+  <div class="signup-link">
+      No account? <a href="signup.php">Sign up now</a>
     </div>
   </div>
 
@@ -149,10 +164,9 @@
     }
 
     function guestLogin() {
-      alert('Guest login clicked. Implement guest access logic.');
-      // Here you can add redirect or guest login logic
+      // This is where you would redirect for guest login
+      window.location.href = "home.php";
     }
   </script>
-
 </body>
 </html>
