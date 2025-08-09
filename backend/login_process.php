@@ -22,7 +22,7 @@ $email = trim($_POST['email']);
 $password_input = $_POST['password'];
 
 // CORRECTED: Column names now match your DDL's capitalization (Name, Email, PasswordHash)
-$sql = "SELECT m.UserID, m.Name, lc.PasswordHash 
+$sql = "SELECT m.UserID, m.Name, m.MembershipType, lc.PasswordHash 
         FROM Members AS m
         JOIN LoginCredentials AS lc ON m.UserID = lc.UserID
         WHERE m.Email = ?";
@@ -37,9 +37,10 @@ if ($result->num_rows === 1) {
 
     // CORRECTED: The key for retrieving the name from the result matches your DDL
     if (password_verify($password_input, $user['PasswordHash'])) {
-        $_SESSION['UserID'] = $user['UserID'];
-        $_SESSION['user_name'] = $user['Name'];
-        $_SESSION['loggedin'] = true;
+    $_SESSION['UserID'] = $user['UserID'];
+    $_SESSION['user_name'] = $user['Name'];
+    $_SESSION['membershipType'] = $user['MembershipType']; // <<< ADD THIS LINE
+    $_SESSION['loggedin'] = true;
 
         header("Location: ../pages/home.php");
         exit();

@@ -1,10 +1,15 @@
 <?php
 session_start();
+require_once 'crud/db_config.php';
 
-// Check if the form was submitted and the session data exists
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['signup_data'])) {
+// Check if the form was submitted from signup2.php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // --- 1. GATHER DATA FROM BOTH FORMS ---
+    if (!isset($_SESSION['signup_data'])) {
+        die("Session data not found. Please start the signup process from the beginning.");
+    }
+    
     $signup_data = $_SESSION['signup_data'];
     $name = $signup_data['name'];
     $email = $signup_data['email'];
@@ -29,93 +34,163 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['signup_data'])) {
         $extra_data['teacherId'] = $_POST['teacherId'] ?? null;
         $extra_data['institution'] = $_POST['institution'] ?? null;
     }
-    
+
     // --- 2. HASH THE PASSWORD FOR SECURITY ---
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    // --- 3. DATABASE CONNECTION ---
-    // Path to your database configuration file
-    require_once 'crud/db_config.php';
-    // Check if the connection is successful
+    // --- 3. DATABASE CONNECTION & TRANSACTION ---
     if ($con->connect_error) {
         die("Database connection failed: " . $con->connect_error);
     }
-    
-    // Start a transaction to ensure all inserts are successful
     $con->begin_transaction();
 
-    // --- 4. INSERT DATA INTO THE DATABASE (PREPARED STATEMENTS) ---
     try {
-        // First, insert into the Members table
-        $sql_members = "INSERT INTO Members (Name, Email, MembershipType, PhoneNumber, Address_Street, Address_City, Address_ZIP) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $stmt_members = $con->prepare($sql_members);
-        $stmt_members->bind_param("sssssss", $name, $email, $membershipType, $phone, $street, $city, $zip);
-        $stmt_members->execute();
-        $new_user_id = $stmt_members->insert_id;
-        $stmt_members->close();
+        $isExistingAuthor = false;
+        $userID = null;
 
-        // Second, insert into the LoginCredentials table
-        $sql_login = "INSERT INTO LoginCredentials (UserID, Email, PasswordHash) VALUES (?, ?, ?)";
-        $stmt_login = $con->prepare($sql_login);
-        $stmt_login->bind_param("iss", $new_user_id, $email, $hashedPassword);
-        $stmt_login->execute();
-        $stmt_login->close();
+        // Step 4: Special logic for Authors - Check if an author with this name already exists
+        if ($membershipType === 'author') {
+            $authorCheckSql = "SELECT m.UserID FROM Members m JOIN Author a ON m.UserID = a.UserID WHERE m.Name = ?";
+            $stmt = $con->prepare($authorCheckSql);
+            $stmt->bind_param("s", $name);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                // Author exists: flag it and get the UserID
+                $authorData = $result->fetch_assoc();
+                $userID = $authorData['UserID'];
+                $isExistingAuthor = true;
+            }
+            $stmt->close();
+        }
 
-        // Third, insert into the specific membership table if it's a registered user type
-        if (in_array($membershipType, ['author', 'general', 'student', 'teacher'])) {
-            $sql_registered = "INSERT INTO Registered (UserID, RegistrationDate) VALUES (?, NOW())";
-            $stmt_registered = $con->prepare($sql_registered);
-            $stmt_registered->bind_param("i", $new_user_id);
-            $stmt_registered->execute();
-            $stmt_registered->close();
+        // Step 5: Insert or Update based on the check
+        if ($isExistingAuthor) {
+            // Case A: Existing Author - Update their information
+            $updateMemberSql = "UPDATE Members SET Email = ?, MembershipType = ?, PhoneNumber = ?, Address_Street = ?, Address_City = ?, Address_ZIP = ? WHERE UserID = ?";
+            $updateMemberStmt = $con->prepare($updateMemberSql);
+            $updateMemberStmt->bind_param("ssssssi", $email, $membershipType, $phone, $street, $city, $zip, $userID);
+            $updateMemberStmt->execute();
+            $updateMemberStmt->close();
 
-            // Insert into the specific subclass table
-            if ($membershipType === 'author') {
-                $sql_author = "INSERT INTO Author (UserID, AuthorTitle, AuthorBio) VALUES (?, ?, ?)";
-                $stmt_author = $con->prepare($sql_author);
-                $stmt_author->bind_param("iss", $new_user_id, $extra_data['authorTitle'], $extra_data['authorBio']);
-                $stmt_author->execute();
-                $stmt_author->close();
-            } elseif ($membershipType === 'general') {
-                $sql_general = "INSERT INTO General (UserID, Occupation) VALUES (?, ?)";
-                $stmt_general = $con->prepare($sql_general);
-                $stmt_general->bind_param("is", $new_user_id, $extra_data['occupation']);
-                $stmt_general->execute();
-                $stmt_general->close();
-            } elseif ($membershipType === 'student') {
-                $sql_student = "INSERT INTO Student (UserID, StudentID, Institution) VALUES (?, ?, ?)";
-                $stmt_student = $con->prepare($sql_student);
-                $stmt_student->bind_param("iss", $new_user_id, $extra_data['studentId'], $extra_data['institution']);
-                $stmt_student->execute();
-                $stmt_student->close();
-            } elseif ($membershipType === 'teacher') {
-                $sql_teacher = "INSERT INTO Teacher (UserID, TeacherID, Institution) VALUES (?, ?, ?)";
-                $stmt_teacher = $con->prepare($sql_teacher);
-                $stmt_teacher->bind_param("iss", $new_user_id, $extra_data['teacherId'], $extra_data['institution']);
-                $stmt_teacher->execute();
-                $stmt_teacher->close();
+            // Update LoginCredentials
+            $updateLoginSql = "UPDATE LoginCredentials SET Email = ?, PasswordHash = ? WHERE UserID = ?";
+            $updateLoginStmt = $con->prepare($updateLoginSql);
+            $updateLoginStmt->bind_param("ssi", $email, $hashedPassword, $userID);
+            $updateLoginStmt->execute();
+            $updateLoginStmt->close();
+            
+            // Update Author-specific details
+            $updateAuthorSql = "UPDATE Author SET AuthorTitle = ?, AuthorBio = ? WHERE UserID = ?";
+            $updateAuthorStmt = $con->prepare($updateAuthorSql);
+            $updateAuthorStmt->bind_param("ssi", $extra_data['authorTitle'], $extra_data['authorBio'], $userID);
+            $updateAuthorStmt->execute();
+            $updateAuthorStmt->close();
+
+        } else {
+            // Case B: New User (including a new author)
+            // Insert into Members table
+            $sql_members = "INSERT INTO Members (Name, Email, MembershipType, PhoneNumber, Address_Street, Address_City, Address_ZIP) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmt_members = $con->prepare($sql_members);
+            $stmt_members->bind_param("sssssss", $name, $email, $membershipType, $phone, $street, $city, $zip);
+            $stmt_members->execute();
+            $userID = $stmt_members->insert_id;
+            $stmt_members->close();
+
+            // Insert into LoginCredentials table
+            $sql_login = "INSERT INTO LoginCredentials (UserID, Email, PasswordHash) VALUES (?, ?, ?)";
+            $stmt_login = $con->prepare($sql_login);
+            $stmt_login->bind_param("iss", $userID, $email, $hashedPassword);
+            $stmt_login->execute();
+            $stmt_login->close();
+
+            // Insert into specific membership tables
+            if (in_array($membershipType, ['author', 'general', 'student', 'teacher'])) {
+                $sql_registered = "INSERT INTO Registered (UserID, RegistrationDate) VALUES (?, NOW())";
+                $stmt_registered = $con->prepare($sql_registered);
+                $stmt_registered->bind_param("i", $userID);
+                $stmt_registered->execute();
+                $stmt_registered->close();
+
+                if ($membershipType === 'author') {
+                    $sql_author = "INSERT INTO Author (UserID, AuthorTitle, AuthorBio) VALUES (?, ?, ?)";
+                    $stmt_author = $con->prepare($sql_author);
+                    $stmt_author->bind_param("iss", $userID, $extra_data['authorTitle'], $extra_data['authorBio']);
+                    $stmt_author->execute();
+                    $stmt_author->close();
+                } elseif ($membershipType === 'general') {
+                    $sql_general = "INSERT INTO General (UserID, Occupation) VALUES (?, ?)";
+                    $stmt_general = $con->prepare($sql_general);
+                    $stmt_general->bind_param("is", $userID, $extra_data['occupation']);
+                    $stmt_general->execute();
+                    $stmt_general->close();
+                } elseif ($membershipType === 'student') {
+                    $sql_student = "INSERT INTO Student (UserID, StudentID, Institution) VALUES (?, ?, ?)";
+                    $stmt_student = $con->prepare($sql_student);
+                    $stmt_student->bind_param("iss", $userID, $extra_data['studentId'], $extra_data['institution']);
+                    $stmt_student->execute();
+                    $stmt_student->close();
+                } elseif ($membershipType === 'teacher') {
+                    $sql_teacher = "INSERT INTO Teacher (UserID, TeacherID, Institution) VALUES (?, ?, ?)";
+                    $stmt_teacher = $con->prepare($sql_teacher);
+                    $stmt_teacher->bind_param("iss", $userID, $extra_data['teacherId'], $extra_data['institution']);
+                    $stmt_teacher->execute();
+                    $stmt_teacher->close();
+                }
+            } elseif ($membershipType === 'librarian') {
+                $employeeSql = "INSERT INTO Employee (UserID, start_date) VALUES (?, CURDATE())";
+                $employeeStmt = $con->prepare($employeeSql);
+                $employeeStmt->bind_param("i", $userID);
+                $employeeStmt->execute();
+                $employeeStmt->close();
+                
+                $librarianSql = "INSERT INTO Librarian (UserID, LibrarianID) VALUES (?, ?)";
+                $librarianId = 'LIBR' . $userID;
+                $librarianStmt = $con->prepare($librarianSql);
+                $librarianStmt->bind_param("is", $userID, $librarianId);
+                $librarianStmt->execute();
+                $librarianStmt->close();
+            } elseif ($membershipType === 'admin') {
+                $employeeSql = "INSERT INTO Employee (UserID, start_date) VALUES (?, CURDATE())";
+                $employeeStmt = $con->prepare($employeeSql);
+                $employeeStmt->bind_param("i", $userID);
+                $employeeStmt->execute();
+                $employeeStmt->close();
+
+                $adminSql = "INSERT INTO Admin (UserID, AdminID) VALUES (?, ?)";
+                $adminId = 'ADM' . $userID;
+                $adminStmt = $con->prepare($adminSql);
+                $adminStmt->bind_param("is", $userID, $adminId);
+                $adminStmt->execute();
+                $adminStmt->close();
             }
         }
-        
-        // If all statements were successful, commit the transaction
+
+        // --- 6. COMMIT, CLEAN UP, AND REDIRECT ---
         $con->commit();
-        
-        // --- 5. CLEAN UP AND REDIRECT ---
-        $con->close();
-        session_unset();
-        session_destroy();
+
+        // Clear session data after successful registration
+        unset($_SESSION['signup_data']);
+
+        // Log the user in automatically after signup
+        $_SESSION['loggedin'] = true;
+        $_SESSION['UserID'] = $userID;
+        $_SESSION['user_name'] = $name;
+        $_SESSION['membershipType'] = $membershipType;
+
         header('Location: ../pages/home.php');
         exit();
 
     } catch (mysqli_sql_exception $e) {
-        // Something went wrong, roll back the transaction
         $con->rollback();
         $con->close();
+        unset($_SESSION['signup_data']); // Clean up session on error
         die("Error: " . $e->getMessage());
     }
 
 } else {
-    // If the session data is missing, redirect back to the first signup page
+    // Redirect to the signup form if accessed directly
     header('Location: signup.php');
     exit();
 }
