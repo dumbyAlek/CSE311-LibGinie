@@ -2,12 +2,13 @@
 session_start();
 
 // Redirect if session data is not available, which means the first form wasn't submitted
-if (!isset($_SESSION['signup_data']['membershipType'])) {
+if (!isset($_SESSION['signup_data'])) {
     header('Location: signup.php');
     exit();
 }
 
-$membershipType = $_SESSION['signup_data']['membershipType'];
+$signupData = $_SESSION['signup_data'];
+$membershipType = $signupData['membershipType'];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -73,6 +74,15 @@ $membershipType = $_SESSION['signup_data']['membershipType'];
     <h2>Additional Information</h2>
     
     <form id="extraForm" action="../backend/process_signup.php" method="POST">
+        <input type="hidden" name="name" value="<?= htmlspecialchars($signupData['name']) ?>">
+        <input type="hidden" name="email" value="<?= htmlspecialchars($signupData['email']) ?>">
+        <input type="hidden" name="membershipType" value="<?= htmlspecialchars($signupData['membershipType']) ?>">
+        <input type="hidden" name="phoneNumber" value="<?= htmlspecialchars($signupData['phone']) ?>">
+        <input type="hidden" name="address_street" value="<?= htmlspecialchars($signupData['street']) ?>">
+        <input type="hidden" name="address_city" value="<?= htmlspecialchars($signupData['city']) ?>">
+        <input type="hidden" name="address_zip" value="<?= htmlspecialchars($signupData['zip']) ?>">
+        <input type="hidden" name="password" value="<?= htmlspecialchars($signupData['password']) ?>">
+
         <div id="extraFields">
             <?php
             // PHP logic to dynamically generate form fields based on membership type

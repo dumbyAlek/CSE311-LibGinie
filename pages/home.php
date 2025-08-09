@@ -2,15 +2,23 @@
 // Assume the user's role is stored in a session after login
 session_start();
 
-// Dummy data for demonstration
+// Get user role from session, default to 'guest' if not set
+$user_role = isset($_SESSION['membershipType']) ? $_SESSION['membershipType'] : 'guest';
+
+// Set a flag for easier conditional checks
+$is_guest = ($user_role === 'guest');
+$is_librarian = ($user_role === 'librarian');
+
 // In a real application, you would get this from your database
-$user_role = 'librarian'; // Change this to 'admin', 'librarian', 'author', 'general', etc., to see the different views
-$librarian_tasks = [
-    'Shelve new arrivals in the Fantasy section.',
-    'Inventory check of Fiction section.',
-    'Assist with student library orientation.'
-];
-$assigned_section = 'Fantasy';
+// For this example, we'll use dummy data only if the user is a librarian
+if ($is_librarian) {
+    $librarian_tasks = [
+        'Shelve new arrivals in the Fantasy section.',
+        'Inventory check of Fiction section.',
+        'Assist with student library orientation.'
+    ];
+    $assigned_section = 'Fantasy';
+}
 ?>
 
 <!DOCTYPE html>
@@ -22,7 +30,6 @@ $assigned_section = 'Fantasy';
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans&display=swap" rel="stylesheet" />
-
     <style>
         :root {
             --sidebar-width: 400px;
@@ -103,7 +110,6 @@ $assigned_section = 'Fantasy';
             color: white;
             border-radius: 4px;
         }
-
 
         .sidebar ul.sublist {
             padding-left: 20px;
@@ -310,6 +316,11 @@ $assigned_section = 'Fantasy';
             font-size: 0.9rem;
             margin-bottom: 5px;
         }
+        .disabled-link {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
 
         /* Responsive */
         @media (max-width: 767px) {
@@ -332,24 +343,28 @@ $assigned_section = 'Fantasy';
 
     <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
 
+    <?php if (!$is_guest) : // Main sidebar for all logged-in users ?>
     <nav class="sidebar closed" id="sidebar">
         <img src="../images/logo3.png" alt="Logo" class="logo" />
 
         <ul>
-            <li><a href="#">Dashboard</a></li>
+            <li><a href="dashboard.php">Dashboard</a></li>
             <li><a href="#">My Books</a></li>
             <li><a href="#">Favorites</a></li>
 
-            <?php if ($user_role == 'admin') : ?>
-            <li><a href="BookMng.html">Book Management</a></li>
+            <?php if ($user_role === 'admin') : ?>
+            <li><a href="../backend/BookMng.php">Book Management</a></li>
+            <li><a href="../backend/MemMng.php">Member Management</a></li>
             <li><a href="EmpMng.html">Employee Management</a></li>
+            <?php elseif ($is_librarian) : ?>
+            <li><a href="MemberMng.html">Member Management</a></li>
+            <li><a href="#">Request Book</a></li>
+            <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
+            <li><a href="#">Request Book</a></li>
+            <li><a href="#">Borrowed Books</a></li>
             <?php endif; ?>
 
-            <?php if ($user_role == 'librarian') : ?>
-            <li><a href="#">Section In-charge: <?php echo htmlspecialchars($assigned_section); ?></a></li>
-            <?php endif; ?>
-
-            <?php if ($user_role == 'author') : ?>
+            <?php if ($user_role === 'author') : ?>
             <li><a href="author_account.html">My Account</a></li>
             <?php endif; ?>
             
@@ -373,12 +388,22 @@ $assigned_section = 'Fantasy';
                 <li><a href="#">[Browse All Genres]</a></li>
             </ul>
             
-            <li><a href="#">Request Book</a></li>
             <li><a href="#">Reserved</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="#">Logout</a></li>
+            <li><a href="settings.php">Settings</a></li>
+            <li><a href="../backend/logout.php">Logout</a></li>
         </ul>
     </nav>
+    <?php else: // Sidebar for Guest users only ?>
+    <nav class="sidebar closed" id="sidebar">
+        <img src="../images/logo3.png" alt="Logo" class="logo" />
+        <ul>
+            <li><a href="signup.php">Sign Up</a></li>
+            <li><a href="#" class="disabled-link">Reserved</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><a href="login.php">Log In</a></li>
+        </ul>
+    </nav>
+    <?php endif; ?>
 
     <div class="content-wrapper">
         <div class="theme-switch-wrapper">
@@ -388,7 +413,7 @@ $assigned_section = 'Fantasy';
             </label>
         </div>
         
-        <?php if ($user_role == 'admin') : ?>
+        <?php if (!$is_guest) : // Notification icon for all logged-in users ?>
         <a href="#" class="notification-icon" title="View Notifications">🔔</a>
         <?php endif; ?>
         
@@ -402,13 +427,14 @@ $assigned_section = 'Fantasy';
             </div>
         </header>
         
-        <?php if ($user_role == 'librarian') : ?>
+        <?php if ($is_librarian) : ?>
         <div class="librarian-tasks" id="taskBox">
             <div class="tasks-header">
                 <span>My Tasks</span>
                 <button class="btn btn-sm btn-link text-dark" onclick="toggleTaskBox()">▼</button>
             </div>
-            <ul class="task-list">
+            <div>Assigned Section: <strong><?php echo htmlspecialchars($assigned_section); ?></strong></div>
+            <ul class="task-list mt-2">
                 <?php foreach ($librarian_tasks as $task) : ?>
                 <li><?php echo htmlspecialchars($task); ?></li>
                 <?php endforeach; ?>

@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS Teacher (
 -- 10. Author: A specialization of Registered.
 CREATE TABLE IF NOT EXISTS Author (
     UserID INT PRIMARY KEY,
-    AuthorID VARCHAR(50) UNIQUE,
+    AuthorID INT AUTO_INCREMENT UNIQUE,
     AuthorTitle VARCHAR(50),
     AuthorBio TEXT,
     FOREIGN KEY (UserID) REFERENCES Registered(UserID)
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS Librarian (
 -- 13. Main Books table (superclass)
 CREATE TABLE IF NOT EXISTS Books (
     ISBN VARCHAR(20) PRIMARY KEY,
-    AuthorID VARCHAR(50),
+    AuthorID INT,
     SectionID INT,
     Title VARCHAR(200) NOT NULL,
     Category VARCHAR(50),
@@ -253,3 +253,14 @@ SELECT
     END AS FineAmount
 FROM
     Borrow;
+
+    
+-- 28. Keep track of viewed books
+CREATE TABLE BookViews (
+    ViewID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT NOT NULL,
+    ISBN VARCHAR(13) NOT NULL,
+    ViewDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserID) REFERENCES Members(UserID),
+    FOREIGN KEY (ISBN) REFERENCES Books(ISBN)
+);
