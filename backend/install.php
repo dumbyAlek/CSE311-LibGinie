@@ -7,7 +7,7 @@
 require_once 'crud/db_config.php';
 
 // Password for 'password123'
-$passwordHash = '$2y$10$wNqH.L00o/D/1FwBvT.6.u6r6u4gJ/n2J2uX0xM7k7.p/8B1V5W5';
+$passwordHash = '$2y$10$66OsT/.Gf89ymqJyhuaYLekBEZeKel5515XKSSrv5w0yXif1emvjG';
 $email = 'admin@libginie.com';
 $name = 'Admin User';
 $membershipType = 'admin';

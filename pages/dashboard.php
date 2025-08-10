@@ -435,10 +435,11 @@ try {
 
             <?php if ($user_role === 'admin') : ?>
             <li><a href="../backend/BookMng.php">Book Management</a></li>
+            <li><a href="../backend/BookMain.php">Book Maintenance</a></li>
+            <li><a href="#">Sections & Shelves</a></li>
             <li><a href="../backend/MemMng.php">Member Management</a></li>
-            <li><a href="EmpMng.html">Employee Management</a></li>
+            <li><a href="../backend/EmpMng.php">Employee Management</a></li>
             <?php elseif ($is_librarian) : ?>
-            <li><a href="MemberMng.html">Member Management</a></li>
             <li><a href="#">Request Book</a></li>
             <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
             <li><a href="#">Request Book</a></li>
@@ -453,10 +454,10 @@ try {
                 <span class="arrow">></span> Categories
             </li>
             <ul class="sublist" id="categoryList" hidden>
-                <li><a href="#">TextBooks</a></li>
-                <li><a href="#">Comics</a></li>
-                <li><a href="#">Novels</a></li>
-                <li><a href="#">Magazines</a></li>
+                <li><a href="categories.php?category=Text Books">Text Books</a></li>
+                <li><a href="categories.php?category=Comics">Comics</a></li>
+                <li><a href="categories.php?category=Novels">Novels</a></li>
+                <li><a href="categories.php?category=Magazines">Magazines</a></li>
             </ul>
 
             <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
@@ -579,9 +580,6 @@ try {
                             </div>
                         </div>
                     </div>
-                    <div class="mt-4 text-center">
-                        <a href="MemberMng.html" class="btn btn-custom">Go to Management</a>
-                    </div>
                     <?php break;
 
                 case 'librarian':
@@ -672,7 +670,6 @@ try {
                             </div>
                         </div>
                     </div>
-                    <a href="MemberMng.html" class="btn btn-custom">Go to Member Management</a>
                 <?php break;
 
                 case 'author':

@@ -90,9 +90,6 @@ CREATE TABLE IF NOT EXISTS Author (
 CREATE TABLE IF NOT EXISTS Admin (
     UserID INT PRIMARY KEY,
     AdminID VARCHAR(50) UNIQUE,
-    Employees_Approved INT DEFAULT 0,
-    Books_Added INT DEFAULT 0,
-    Maintenance_Reported INT DEFAULT 0,
     FOREIGN KEY (UserID) REFERENCES Employee(UserID)
 );
 
@@ -137,6 +134,7 @@ CREATE TABLE IF NOT EXISTS Comics (
 -- 16. Novels table (specialization of Books)
 CREATE TABLE IF NOT EXISTS Novels (
     ISBN VARCHAR(20) PRIMARY KEY,
+    Narration  VARCHAR(20),
     FOREIGN KEY (ISBN) REFERENCES Books(ISBN)
 );
 
@@ -153,21 +151,12 @@ CREATE TABLE IF NOT EXISTS Genres (
     GenreName VARCHAR(50) UNIQUE NOT NULL
 );
 
--- 19. Junction table for Novels and Genres
-CREATE TABLE IF NOT EXISTS Novel_Genres (
+-- 19. Junction table for Books and Genres
+CREATE TABLE IF NOT EXISTS Book_Genres (
     ISBN VARCHAR(20),
     GenreID INT,
     PRIMARY KEY (ISBN, GenreID),
-    FOREIGN KEY (ISBN) REFERENCES Novels(ISBN),
-    FOREIGN KEY (GenreID) REFERENCES Genres(GenreID)
-);
-
--- 20. Junction table for Comics and Genres (Correctly named)
-CREATE TABLE IF NOT EXISTS Comics_Genres (
-    ISBN VARCHAR(20),
-    GenreID INT,
-    PRIMARY KEY (ISBN, GenreID),
-    FOREIGN KEY (ISBN) REFERENCES Comics(ISBN),
+    FOREIGN KEY (ISBN) REFERENCES Books(ISBN),
     FOREIGN KEY (GenreID) REFERENCES Genres(GenreID)
 );
 
@@ -263,4 +252,14 @@ CREATE TABLE BookViews (
     ViewDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserID) REFERENCES Members(UserID),
     FOREIGN KEY (ISBN) REFERENCES Books(ISBN)
+);
+
+-- 29. Keep track of added books
+CREATE TABLE IF NOT EXISTS BooksAdded (
+    ISBN VARCHAR(20) NOT NULL,
+    UserID INT NOT NULL,
+    AddDate DATE NOT NULL,
+    PRIMARY KEY (ISBN, UserID),
+    FOREIGN KEY (ISBN) REFERENCES Books(ISBN),
+    FOREIGN KEY (UserID) REFERENCES Admin(UserID)
 );

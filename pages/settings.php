@@ -419,6 +419,8 @@ $con->close();
 
             <?php if ($user_role === 'admin') : ?>
             <li><a href="../backend/BookMng.php">Book Management</a></li>
+            <li><a href="../backend/BookMain.php">Book Maintenancet</a></li>
+            <li><a href="#">Sections & Shelves</a></li>
             <li><a href="../backend/MemMng.php">Member Management</a></li>
             <li><a href="EmpMng.html">Employee Management</a></li>
             <?php elseif ($is_librarian) : ?>
@@ -437,10 +439,10 @@ $con->close();
                 <span class="arrow">></span> Categories
             </li>
             <ul class="sublist" id="categoryList" hidden>
-                <li><a href="#">TextBooks</a></li>
-                <li><a href="#">Comics</a></li>
-                <li><a href="#">Novels</a></li>
-                <li><a href="#">Magazines</a></li>
+                <li><a href="categories.php?category=Text Books">Text Books</a></li>
+                <li><a href="categories.php?category=Comics">Comics</a></li>
+                <li><a href="categories.php?category=Novels">Novels</a></li>
+                <li><a href="categories.php?category=Magazines">Magazines</a></li>
             </ul>
 
             <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
