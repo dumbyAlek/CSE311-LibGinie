@@ -25,7 +25,7 @@ $password_input = $_POST['password'];
 $sql = "SELECT m.UserID, m.Name, m.MembershipType, lc.PasswordHash 
         FROM Members AS m
         JOIN LoginCredentials AS lc ON m.UserID = lc.UserID
-        WHERE m.Email = ?";
+        WHERE lc.Email = ?";
 
 $stmt = $con->prepare($sql);
 $stmt->bind_param("s", $email);
@@ -39,12 +39,12 @@ if ($result->num_rows === 1) {
     if (password_verify($password_input, $user['PasswordHash'])) {
     $_SESSION['UserID'] = $user['UserID'];
     $_SESSION['user_name'] = $user['Name'];
-    $_SESSION['membershipType'] = $user['MembershipType']; // <<< ADD THIS LINE
+    $_SESSION['membershipType'] = $user['MembershipType']; // <<< Add this line
     $_SESSION['loggedin'] = true;
 
-        header("Location: ../pages/home.php");
-        exit();
-    } else {
+    header("Location: ../pages/home.php");
+    exit();
+} else {
         $_SESSION['login_error'] = "Invalid email or password.";
         header("Location: ../pages/loginn.php");
         exit();
