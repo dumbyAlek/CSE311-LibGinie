@@ -45,9 +45,8 @@ try {
             (SELECT COUNT(*) FROM Books b WHERE b.AuthorID = a.AuthorID) AS NumBooks
         FROM Members m
         JOIN Registered r ON m.UserID = r.UserID
-        JOIN Author a ON m.UserID = a.UserID
+        LEFT JOIN Author a ON m.UserID = a.UserID
         LEFT JOIN Books b ON a.AuthorID = b.AuthorID
-        WHERE m.MembershipType = 'author'
         GROUP BY m.UserID, m.Name, m.Email, r.RegistrationDate, a.AuthorTitle
         ORDER BY m.Name ASC";
         
@@ -55,17 +54,6 @@ try {
     $stmt_registered_authors->execute();
     $registered_authors = $stmt_registered_authors->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt_registered_authors->close();
-
-    // Fetch librarians
-    $sql_librarians = "
-        SELECT l.UserID, m.Name, m.Email
-        FROM Librarian l
-        JOIN Members m ON l.UserID = m.UserID
-        ORDER BY m.Name ASC";
-    $stmt_librarians = $con->prepare($sql_librarians);
-    $stmt_librarians->execute();
-    $librarians = $stmt_librarians->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt_librarians->close();
 
     // Fetch admins
     $sql_admins = "
@@ -96,7 +84,7 @@ $con->close();
     <style>
         /* ... (Your existing CSS styles go here) ... */
         :root {
-            --sidebar-width: 250px;
+            --sidebar-width: 450px;
         }
 
         body {
@@ -349,8 +337,10 @@ $con->close();
 
             <?php if ($is_admin) : ?>
             <li><a href="BookMng.php">Book Management</a></li>
+            <li><a href="BookMain.php">Book Maintenance</a></li>
+            <li><a href="#">Sections & Shelves</a></li>
             <li><a href="MemMng.php">Member Management</a></li>
-            <li><a href="EmployeeMng.php">Employee Management</a></li>
+            <li><a href="EmpMng.php">Employee Management</a></li>
             <?php elseif ($is_librarian) : ?>
             <li><a href="MemMng.php">Member Management</a></li>
             <li><a href="#">Request Book</a></li>
@@ -359,18 +349,15 @@ $con->close();
             <li><a href="#">Borrowed Books</a></li>
             <?php endif; ?>
             
-            <?php if ($user_role === 'author') : ?>
-            <li><a href="author_account.html">My Account</a></li>
-            <?php endif; ?>
             
             <li class="collapsible-header" onclick="toggleSublist('categoryList')" aria-expanded="false" aria-controls="categoryList">
                 <span class="arrow">></span> Categories
             </li>
             <ul class="sublist" id="categoryList" hidden>
-                <li><a href="#">TextBooks</a></li>
-                <li><a href="#">Comics</a></li>
-                <li><a href="#">Novels</a></li>
-                <li><a href="#">Magazines</a></li>
+                <li><a href="../pages/categories.php?category=Text Books">Text Books</a></li>
+                <li><a href="../pages/categories.php?category=Comics">Comics</a></li>
+                <li><a href="../pages/categories.php?category=Novels">Novels</a></li>
+                <li><a href="../pages/categories.php?category=Magazines">Magazines</a></li>
             </ul>
 
             <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
@@ -488,39 +475,6 @@ $con->close();
                 </div>
             </div>
             
-            <div class="card p-3 mb-4">
-                <h5 class="card-title">Librarians</h5>
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th scope="col">Name</th>
-                                <th scope="col">Email</th>
-                                <th scope="col">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($librarians)): ?>
-                                <?php foreach ($librarians as $librarian): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($librarian['Name']) ?></td>
-                                    <td><?= htmlspecialchars($librarian['Email']) ?></td>
-                                    <td>
-                                        <form action="DeleteMember.php" method="POST" onsubmit="return confirm('Are you sure you want to delete this librarian? This action cannot be undone.');">
-                                            <input type="hidden" name="UserID" value="<?= htmlspecialchars($librarian['UserID']) ?>">
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr><td colspan="3" class="text-center">No librarians found.</td></tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
             <div class="card p-3">
                 <h5 class="card-title">Admins</h5>
                 <div class="table-responsive">

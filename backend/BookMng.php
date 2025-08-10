@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['query'])) {
     $search_query = '%' . $_GET['query'] . '%';
 
     try {
-        $stmt = $con->prepare("SELECT b.ISBN, b.Title, b.CoverPicture, m.Name AS AuthorName FROM Books b JOIN Author a ON b.AuthorID = a.AuthorID JOIN Members m ON a.UserID = m.UserID WHERE b.Title LIKE ? OR b.ISBN LIKE ? OR m.Name LIKE ?");
+        $stmt = $con->prepare("SELECT b.ISBN, b.Title, b.CoverPicture, b.Category, m.Name AS AuthorName FROM Books b JOIN Author a ON b.AuthorID = a.AuthorID JOIN Members m ON a.UserID = m.UserID WHERE b.Title LIKE ? OR b.ISBN LIKE ? OR m.Name LIKE ?");
         $stmt->bind_param("sss", $search_query, $search_query, $search_query);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -38,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['query'])) {
             $books[] = [
                 'isbn' => $row['ISBN'],
                 'title' => $row['Title'],
+                'category' => $row['Category'],
                 'author_name' => $row['AuthorName'],
                 'book_cover' => $row['CoverPicture']
             ];
@@ -54,9 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['query'])) {
 // === ADD BOOK LOGIC ===
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
-
+    
     $data = json_decode(file_get_contents("php://input"), true);
-
+    
     if ($data && isset($data['action']) && $data['action'] === 'add_book') {
         $isbn = $data['isbn'];
         $title = $data['title'];
@@ -65,8 +66,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $publisher = $data['publisher'];
         $published_year = $data['published_year'];
         $cover_picture = $data['cover_picture'];
+        $section_id = $data['section_id']; 
+        $genres = isset($data['genres']) ? explode(',', $data['genres']) : [];
 
         try {
+            //Test Add Start
+            // Validate or create section
+                if (!empty($section_id) && is_numeric($section_id)) {
+                    $stmt_check_section = $con->prepare("SELECT SectionID FROM Library_Sections WHERE SectionID = ?");
+                    $stmt_check_section->bind_param("i", $section_id);
+                    $stmt_check_section->execute();
+                    $result_check_section = $stmt_check_section->get_result();
+
+                    if ($result_check_section->num_rows === 0) {
+                        // Instead of forcing a specific SectionID, let MySQL assign it if it's AUTO_INCREMENT
+                        $new_section_name = "Section " . $section_id;
+                        $stmt_create_section = $con->prepare("INSERT INTO Library_Sections (Name) VALUES (?)");
+                        $stmt_create_section->bind_param("s", $new_section_name);
+                        $stmt_create_section->execute();
+                        $section_id = $stmt_create_section->insert_id; // Get the actual ID
+                        $stmt_create_section->close();
+                    }
+                    $stmt_check_section->close();
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Invalid Section ID']);
+                    exit;
+                }
+
+            //Test Add End
+            
             // Step 1: Find the UserID from the Members table
             $user_id = null;
             $stmt = $con->prepare("SELECT UserID FROM Members WHERE Name = ?");
@@ -115,13 +143,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $stmt->close();
             
-            // Step 4: Insert the new book using the AuthorID
+            // Step 4: Insert the new book using the AuthorID and SectionID
             if ($author_id) {
-                // CORRECTED bind_param: Changed from "ssisssi" to "ssissis"
-                $stmt = $con->prepare("INSERT INTO Books (ISBN, Title, AuthorID, Category, Publisher, PublishedYear, CoverPicture) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("ssissis", $isbn, $title, $author_id, $category, $publisher, $published_year, $cover_picture);
+                $stmt = $con->prepare("INSERT INTO Books (ISBN, Title, AuthorID, SectionID, Category, Publisher, PublishedYear, CoverPicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("ssiissis", $isbn, $title, $author_id, $section_id, $category, $publisher, $published_year, $cover_picture);
 
                 if ($stmt->execute()) {
+                    // New: Insert into the correct specialized table based on category
+                    if ($category === 'Text Books') {
+                        $stmt_insert = $con->prepare("INSERT INTO TextBook (ISBN) VALUES (?)");
+                        $stmt_insert->bind_param("s", $isbn);
+                        $stmt_insert->execute();
+                        $stmt_insert->close();
+                    } elseif ($category === 'Comics') {
+                        $stmt_insert = $con->prepare("INSERT INTO Comics (ISBN) VALUES (?)");
+                        $stmt_insert->bind_param("s", $isbn);
+                        $stmt_insert->execute();
+                        $stmt_insert->close();
+                    } elseif ($category === 'Novels') {
+                        $stmt_insert = $con->prepare("INSERT INTO Novels (ISBN) VALUES (?)");
+                        $stmt_insert->bind_param("s", $isbn);
+                        $stmt_insert->execute();
+                        $stmt_insert->close();
+                    } elseif ($category === 'Magazines') {
+                        $stmt_insert = $con->prepare("INSERT INTO Magazines (ISBN) VALUES (?)");
+                        $stmt_insert->bind_param("s", $isbn);
+                        $stmt_insert->execute();
+                        $stmt_insert->close();
+                    }
+                    
+                    // Handle genres
+                    foreach ($genres as $genre_name) {
+                        $genre_name = trim($genre_name);
+                        if (!empty($genre_name)) {
+                            // Check if genre exists
+                            $stmt_genre = $con->prepare("SELECT GenreID FROM Genres WHERE GenreName = ?");
+                            $stmt_genre->bind_param("s", $genre_name);
+                            $stmt_genre->execute();
+                            $result_genre = $stmt_genre->get_result();
+                            
+                            $genre_id = null;
+                            if ($row_genre = $result_genre->fetch_assoc()) {
+                                $genre_id = $row_genre['GenreID'];
+                            } else {
+                                // If not, create it
+                                $stmt_new_genre = $con->prepare("INSERT INTO Genres (GenreName) VALUES (?)");
+                                $stmt_new_genre->bind_param("s", $genre_name);
+                                $stmt_new_genre->execute();
+                                $genre_id = $stmt_new_genre->insert_id;
+                                $stmt_new_genre->close();
+                            }
+                            $stmt_genre->close();
+                            
+                            // Insert into Book_Genres
+                            if ($genre_id) {
+                                $stmt_book_genre = $con->prepare("INSERT INTO Book_Genres (ISBN, GenreID) VALUES (?, ?)");
+                                $stmt_book_genre->bind_param("si", $isbn, $genre_id);
+                                $stmt_book_genre->execute();
+                                $stmt_book_genre->close();
+                            }
+                        }
+                    }
+
+                    // Add entry to BooksAdded table
+                    $admin_user_id = $_SESSION['UserID'] ?? null; // Assumes admin UserID is stored in session
+                    if ($admin_user_id) {
+                        $stmt_books_added = $con->prepare("INSERT INTO BooksAdded (ISBN, UserID, AddDate) VALUES (?, ?, NOW())");
+                        $stmt_books_added->bind_param("si", $isbn, $admin_user_id);
+                        $stmt_books_added->execute();
+                        $stmt_books_added->close();
+                    }
+                    
                     echo json_encode(['success' => true, 'message' => 'Book added successfully.']);
                 } else {
                     echo json_encode(['success' => false, 'message' => 'Failed to add book.']);
@@ -466,10 +558,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span class="arrow">></span> Categories
             </li>
             <ul class="sublist" id="categoryList" hidden>
-                <li><a href="#">TextBooks</a></li>
-                <li><a href="#">Comics</a></li>
-                <li><a href="#">Novels</a></li>
-                <li><a href="#">Magazines</a></li>
+                <li><a href="../pages/categories.php?category=Text Books">Text Books</a></li>
+                <li><a href="../pages/categories.php?category=Comics">Comics</a></li>
+                <li><a href="../pages/categories.php?category=Novels">Novels</a></li>
+                <li><a href="../pages/categories.php?category=Magazines">Magazines</a></li>
             </ul>
 
             <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
@@ -484,7 +576,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <li><a href="#">Reserved</a></li>
             <li><a href="../../pages/settings.php">Settings</a></li>
-            <li><a href="logout.php">Logout</a></li>
+            <li><a href="../logout.php">Logout</a></li>
         </ul>
     </nav>
     <?php else: // Sidebar for Guest users only ?>
@@ -526,9 +618,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label for="author_name" class="form-label">Author Name</label>
                         <input type="text" class="form-control" id="author_name" name="author_name" required>
                     </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control" id="category" name="category" required>
+                            <option value="">Select a Category</option>
+                            <option value="Text Books">Text Books</option>
+                            <option value="Comics">Comics</option>
+                            <option value="Novels">Novels</option>
+                            <option value="Magazines">Magazines</option>
+                        </select>
+                    </div>
                     <div class="mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <input type="text" class="form-control" id="category" name="category">
+                        <label for="section_id" class="form-label">Section ID</label>
+                        <input type="number" class="form-control" id="section_id" name="section_id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="genres" class="form-label">Genre</label>
+                        <input type="text" class="form-control" id="genres" name="genres">
                     </div>
                     <div class="mb-3">
                         <label for="publisher" class="form-label">Publisher</label>
@@ -560,6 +666,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <th>Cover</th>
                             <th>ISBN</th>
                             <th>Title</th>
+                            <th>Category</th>
                             <th>Author Name</th>
                             <th>Actions</th>
                         </tr>
@@ -594,8 +701,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="text" class="form-control" id="editAuthorName" name="author_name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="editCategory" class="form-label">Category</label>
-                            <input type="text" class="form-control" id="editCategory" name="category">
+                            <label for="editCategory" class="form-label">Category</label>
+                            <select class="form-control" id="editCategory" name="category" required>
+                                <option value="">Select a Category</option>
+                                <option value="Text Books">Text Books</option>
+                                <option value="Comics">Comics</option>
+                                <option value="Novels">Novels</option>
+                                <option value="Magazines">Magazines</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editSectionID" class="form-label">Section ID</label>
+                            <input type="number" class="form-control" id="editSectionID" name="section_id" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editGenres" class="form-label">Genre</label>
+                            <input type="text" class="form-control" id="editGenres" name="genres">
                         </div>
                         <div class="mb-3">
                             <label for="editPublisher" class="form-label">Publisher</label>
@@ -679,6 +800,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <td><img src="${book.book_cover || 'placeholder.png'}" alt="Cover" class="img-thumbnail"></td>
                                 <td>${book.isbn}</td>
                                 <td>${book.title}</td>
+                                <td>${book.category}</td>
                                 <td>${book.author_name}</td>
                                 <td>
                                     <button class="btn btn-sm btn-info edit-btn" data-isbn="${book.isbn}" data-bs-toggle="modal" data-bs-target="#editDeleteModal">Edit</button>
@@ -746,7 +868,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 category: formData.get('category'),
                                 publisher: formData.get('publisher'),
                                 published_year: formData.get('published_year'),
-                                cover_picture: coverUrl
+                                cover_picture: coverUrl,
+                                section_id: formData.get('section_id'), // New
+                                genres: formData.get('genres') // New
                             })
                         });
                         const result = await response.json();
@@ -840,9 +964,10 @@ if (saveEditBtn) {
         const category = document.getElementById('editCategory').value;
         const publisher = document.getElementById('editPublisher').value;
         const published_year = document.getElementById('editPublishedYear').value;
+        const section_id = document.getElementById('editSectionID').value; // New
+        const genres = document.getElementById('editGenres').value; // New
         const bookCoverFile = document.getElementById('editCoverPicture').files[0];
         let cover_picture = null;
-
         // Check if a new image file has been selected
         if (bookCoverFile) {
             const uploadFormData = new FormData();
@@ -871,13 +996,15 @@ if (saveEditBtn) {
         
         // Prepare the data to update the book, using the new URL or the existing one
         const updateData = {
-            action: 'update_book',
-            isbn,
-            title,
-            author_name,
-            category,
-            publisher,
-            published_year
+        action: 'update_book',
+        isbn,
+        title,
+        author_name,
+        category,
+        publisher,
+        published_year,
+        section_id, // New
+        genres // New
         };
         
         // Only add the cover_picture key if a new one was uploaded

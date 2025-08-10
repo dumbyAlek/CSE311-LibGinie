@@ -1,16 +1,79 @@
 <?php
-// Assume the user's role is stored in a session after login
+// Start the session
 session_start();
 
-// Get user role from session, default to 'guest' if not set
-$user_role = isset($_SESSION['membershipType']) ? $_SESSION['membershipType'] : 'guest';
+// Ensure the user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header("Location: ../pages/loginn.php");
+    exit;
+}
 
-// Set a flag for easier conditional checks
+// Include your database configuration
+require_once '../backend/crud/db_config.php';
+
+// Get user data from the session
+$user_id = $_SESSION['UserID'];
+$user_role = isset($_SESSION['membershipType']) ? $_SESSION['membershipType'] : 'guest';
 $is_guest = ($user_role === 'guest');
 $is_librarian = ($user_role === 'librarian');
 
-// In a real application, you would get this from your database
-// For this example, we'll use dummy data only if the user is a librarian
+// Get the category from the URL, or default to an empty string
+$category = $_GET['category'] ?? '';
+$search_query = $_GET['search'] ?? '';
+
+// Initialize an empty array for books
+$books = [];
+$error_message = '';
+
+// Fetch books based on the selected category and search query
+if ($category) {
+    // Sanitize the category and search query
+    $safe_category = $con->real_escape_string($category);
+    $search_param = "%" . $con->real_escape_string($search_query) . "%";
+
+    $sql = "
+        SELECT 
+            b.Title, 
+            b.ISBN, 
+            b.CoverPicture, 
+            m.Name AS AuthorName,
+            GROUP_CONCAT(g.GenreName SEPARATOR ', ') AS Genres
+        FROM 
+            Books b
+        LEFT JOIN 
+            Author a ON b.AuthorID = a.AuthorID
+        LEFT JOIN 
+            Members m ON a.UserID = m.UserID
+        LEFT JOIN 
+            Book_Genres bg ON b.ISBN = bg.ISBN
+        LEFT JOIN 
+            Genres g ON bg.GenreID = g.GenreID
+        WHERE 
+            b.Category = ? AND b.Title LIKE ?
+        GROUP BY 
+            b.ISBN
+        ORDER BY 
+            b.Title";
+    
+    $stmt = $con->prepare($sql);
+    $stmt->bind_param("ss", $safe_category, $search_param);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $books[] = $row;
+        }
+    } else {
+        $error_message = "No books found in the '" . htmlspecialchars($category) . "' category matching your search.";
+    }
+
+    $stmt->close();
+} else {
+    $error_message = "Please select a category.";
+}
+
+$con->close();
 ?>
 
 <!DOCTYPE html>
@@ -18,19 +81,20 @@ $is_librarian = ($user_role === 'librarian');
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>LibGinie - Home</title>
-
+    <title>LibGinie - <?php echo htmlspecialchars($category); ?></title>
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&family=Open+Sans&display=swap" rel="stylesheet" />
     <style>
-        :root {
-            --sidebar-width: 400px;
-        }
-
         body {
+            background-color: #eed9c4; 
             margin: 0;
             font-family: 'Open Sans', sans-serif;
             transition: background-color 0.3s, color 0.3s;
+        }
+
+        :root {
+            --sidebar-width: 400px;
         }
 
         body.dark-theme {
@@ -120,7 +184,7 @@ $is_librarian = ($user_role === 'librarian');
             z-index: 1100;
             width: 40px;
             height: 40px;
-            background-color: #7b3fbf; /* violet square */
+            background-color: #7b3fbf;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -133,9 +197,8 @@ $is_librarian = ($user_role === 'librarian');
             content: "≡";
             color: white;
             font-size: 20px;
-            transform: rotate(90deg); /* Rotated vertical bars */
+            transform: rotate(90deg);
         }
-
 
         .content-wrapper {
             margin-left: var(--sidebar-width);
@@ -146,51 +209,47 @@ $is_librarian = ($user_role === 'librarian');
             margin-left: 0;
         }
 
-        .bg-header {
-            background-image: url('../images/header.jpg');
-            background-size: cover;
-            height: 300px;
-            background-position: center;
-            padding: 80px 20px 40px;
-            color: white;
-            transition: margin-left 0.3s, width 0.3s;
+        /* Container for the heading and search bar */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 40px 0 20px;
         }
-
-        .sidebar.closed ~ .content-wrapper .bg-header {
-            margin-left: 0;
-        }
-
-        .search-bar {
-            max-width: 600px;
-            margin: auto;
-        }
-
+        
         .section-title {
             font-family: 'Montserrat', sans-serif;
             font-size: 1.8rem;
-            margin: 40px 0 20px;
+            margin: 0;
         }
 
-        .book-section {
-            white-space: nowrap;
-            overflow-x: auto;
-            padding-bottom: 10px;
+        /* Search Form Styles */
+        .search-form {
+            display: flex;
+            align-items: center;
         }
-
-        .book-card {
-            display: inline-block;
-            width: 150px;
-            margin-right: 15px;
-            background: white;
-            border-radius: 5px;
-            padding: 10px;
-            text-align: center;
+        .search-input {
+            width: 250px; /* Adjust size as needed */
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px; /* Rounded corners */
+            font-size: 1rem;
+            transition: width 0.3s ease-in-out;
         }
-
-        .book-card img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
+        .search-input:focus {
+            outline: none;
+            border-color: #7b3fbf;
+            box-shadow: 0 0 0 2px rgba(123, 63, 191, 0.2);
+            width: 300px; /* Expand on focus */
+        }
+        .search-btn {
+            background-color: #7b3fbf;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin-left: 10px;
+            cursor: pointer;
         }
 
         footer {
@@ -247,86 +306,69 @@ $is_librarian = ($user_role === 'librarian');
         }
 
         .arrow {
-            margin-right: 8px; /* Adjust the space as you want */
+            margin-right: 8px;
         }
 
         input:checked + .slider {
-            background-color: #7b3fbf; /* violet */
+            background-color: #7b3fbf;
         }
 
         input:checked + .slider:before {
             transform: translateX(24px);
         }
-
-        .logo-on-header {
-            display: none;
-            position: absolute;
-            top: 20px;
-            left: 70px;
-            width: 200px;
-            z-index: 100;
-        }
-
-        .logo-on-header.visible {
-            display: block;
-        }
         
-        /* New Styles for Admin and Librarian features */
         .notification-icon {
             position: fixed;
-            top: 60px; /* Below the toggle switch */
+            top: 60px;
             right: 20px;
             z-index: 1000;
             color: #7b3fbf;
             font-size: 24px;
             cursor: pointer;
         }
-        .librarian-tasks {
-            position: fixed;
-            top: 150px;
-            right: 20px;
-            width: 300px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            z-index: 990;
-            transition: transform 0.3s ease-in-out;
-        }
-        .librarian-tasks.collapsed {
-            transform: translateX(calc(100% + 20px));
-        }
-        .tasks-header {
-            font-weight: bold;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .task-list li {
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
         .disabled-link {
             opacity: 0.6;
             cursor: not-allowed;
             pointer-events: none;
         }
-
-        /* Responsive */
+        
         @media (max-width: 767px) {
             .sidebar {
                 transform: translateX(-100%);
             }
-
             .sidebar.closed {
                 transform: translateX(-100%);
             }
-
             .content-wrapper {
                 margin-left: 0 !important;
             }
+        }
+        .book-card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+        }
+        .book-card img {
+            max-width: 120px;
+            height: auto;
+            border-radius: 4px;
+            margin-right: 20px;
+        }
+        .book-info {
+            flex-grow: 1;
+        }
+        .book-info h5 {
+            font-family: 'Montserrat', sans-serif;
+            color: #7b3fbf;
+        }
+        .dark-theme .book-card {
+            background-color: #222;
+            color: #eee;
+            border-color: #444;
         }
     </style>
 </head>
@@ -337,8 +379,7 @@ $is_librarian = ($user_role === 'librarian');
 
     <?php if (!$is_guest) : // Main sidebar for all logged-in users ?>
     <nav class="sidebar closed" id="sidebar">
-        <img src="../images/logo3.png" alt="Logo" class="logo" />
-
+        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
         <ul>
             <li><a href="dashboard.php">Dashboard</a></li>
             <li><a href="#">My Books</a></li>
@@ -348,11 +389,10 @@ $is_librarian = ($user_role === 'librarian');
             <li><a href="../backend/BookMng.php">Book Management</a></li>
             <li><a href="../backend/BookMain.php">Book Maintenance</a></li>
             <li><a href="#">Sections & Shelves</a></li>
-
             <li><a href="../backend/MemMng.php">Member Management</a></li>
             <li><a href="../backend/EmpMng.php">Employee Management</a></li>
             <?php elseif ($is_librarian) : ?>
-            <li><a href="MemberMng.html">Member Management</a></li>
+            <li><a href="../backend/MemMng.php">Member Management</a></li>
             <li><a href="#">Request Book</a></li>
             <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
             <li><a href="#">Request Book</a></li>
@@ -364,7 +404,7 @@ $is_librarian = ($user_role === 'librarian');
             <?php endif; ?>
             
             <li class="collapsible-header" onclick="toggleSublist('categoryList')" aria-expanded="false" aria-controls="categoryList">
-                <span class="arrow">></span> Categories
+                <span class="arrow">v</span> Categories
             </li>
             <ul class="sublist" id="categoryList" hidden>
                 <li><a href="categories.php?category=Text Books">Text Books</a></li>
@@ -390,121 +430,53 @@ $is_librarian = ($user_role === 'librarian');
     </nav>
     <?php else: // Sidebar for Guest users only ?>
     <nav class="sidebar closed" id="sidebar">
-        <img src="../images/logo3.png" alt="Logo" class="logo" />
+        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
         <ul>
             <li><a href="signup.php">Sign Up</a></li>
             <li><a href="#" class="disabled-link">Reserved</a></li>
             <li><a href="#">Settings</a></li>
-            <li><a href="login.php">Log In</a></li>
+            <li><a href="../pages/loginn.php">Log In</a></li>
         </ul>
     </nav>
     <?php endif; ?>
 
     <div class="content-wrapper">
-        <div class="theme-switch-wrapper">
-            <label class="theme-switch" for="themeToggle">
-                <input type="checkbox" id="themeToggle" />
-                <span class="slider"></span>
-            </label>
-        </div>
-        
-        <?php if ($is_librarian) : // Notification icon for all logged-in users ?>
-        <a href="#" class="notification-icon" title="View Notifications" onclick="toggleTaskBox()">🔔</a>
-
-        <?php endif; ?>
-        
-        <header class="bg-header text-center">
-            <div id="headerLogo" class="logo-on-header">
-                <img src="../images/logo3.png" alt="Logo" />
-            </div>
-
-            <div class="search-bar">
-                <input type="text" class="form-control form-control-lg" placeholder="Search books...">
-            </div>
-        </header>
-        
-        <?php
-// ... existing PHP code for session, role checks, etc. ...
-
-// This block combines the data retrieval and display logic for the librarian task box.
-if ($is_librarian && isset($_SESSION['UserID'])) {
-    // Database connection details are assumed to be available
-    require_once '../backend/crud/db_config.php';
-
-    $librarian_user_id = $_SESSION['UserID'];
-    $assigned_section = 'Not assigned yet';
-
-    // Retrieve the assigned section from the database
-    $sql = "SELECT InChargeOf FROM Librarian WHERE UserID = ?";
-    $stmt = $con->prepare($sql);
-
-    if ($stmt) {
-        $stmt->bind_param("i", $librarian_user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            $assigned_section = htmlspecialchars($row['InChargeOf']);
-        }
-        $stmt->close();
-    }
-    $con->close();
-
-    // Now, render the HTML for the librarian's task box
-    // This part is included inside the same 'if' block
-    ?>
-        <div class="librarian-tasks" id="taskBox">
-        <div class="tasks-header">
-            <span>My Tasks</span>
-            <button class="btn btn-sm btn-link text-dark" onclick="toggleTaskBox()">▼</button>
-        </div>
-        
-        <div style="font-size: 1.25rem; font-weight: bold;">
-            Assigned Section:
-        </div>
-        
-        <div style="font-size: 0.9rem; margin-top: 5px;">
-            <?php echo $assigned_section; ?>
-        </div>
-
-        <ul class="task-list mt-2" style="font-size: 0.9rem;">
-            </ul>
-    </div>
-    <?php
-}
-?>
-
         <main class="container mt-4">
-            <h3 class="section-title">New Arrivals</h3>
-            <div class="book-section">
-                <div class="book-card"><img src="images/book1.jpg" alt="Book"><p>Book Title</p></div>
+            <div class="section-header">
+                <h3 class="section-title"><?php echo htmlspecialchars($category); ?></h3>
+                <form class="search-form" action="categories.php" method="GET">
+                    <input type="hidden" name="category" value="<?php echo htmlspecialchars($category); ?>">
+                    <input 
+                        type="search" 
+                        name="search" 
+                        class="form-control search-input" 
+                        placeholder="Search books..." 
+                        value="<?php echo htmlspecialchars($search_query); ?>"
+                    >
+                </form>
             </div>
 
-            <h3 class="section-title">Recommended For You</h3>
-            <div class="book-section">
-                <div class="book-card"><img src="images/book2.jpg" alt="Book"><p>Book Title</p></div>
-            </div>
-
-            <h3 class="section-title">Trending</h3>
-            <div class="book-section">
-                <div class="book-card"><img src="images/book3.jpg" alt="Book"><p>Book Title</p></div>
-            </div>
-
-            <h3 class="section-title">Top Rated</h3>
-            <div class="book-section">
-                <div class="book-card"><img src="images/book4.jpg" alt="Book"><p>Book Title</p></div>
-            </div>
-
-            <h3 class="section-title">Favourites</h3>
-            <div class="book-section">
-                <div class="book-card"><img src="images/book5.jpg" alt="Book"><p>Book Title</p></div>
-            </div>
-
-            <h3 class="section-title">Your Read</h3>
-            <div class="book-section">
-                <div class="book-card"><img src="images/book6.jpg" alt="Book"><p>Book Title</p></div>
-            </div>
+            <?php if ($error_message): ?>
+                <div class="alert alert-warning"><?php echo $error_message; ?></div>
+            <?php else: ?>
+                <div class="book-list">
+                    <?php foreach ($books as $book): ?>
+                        <div class="book-card">
+                            <?php if ($book['CoverPicture']): ?>
+                                <img src="<?php echo htmlspecialchars($book['CoverPicture']); ?>" alt="Cover of <?php echo htmlspecialchars($book['Title']); ?>">
+                            <?php else: ?>
+                                <img src="../images/no-cover.png" alt="No cover available">
+                            <?php endif; ?>
+                            <div class="book-info">
+                                <h5><?php echo htmlspecialchars($book['Title']); ?></h5>
+                                <p><strong>Author:</strong> <?php echo htmlspecialchars($book['AuthorName'] ?? 'Unknown'); ?></p>
+                                <p><strong>ISBN:</strong> <?php echo htmlspecialchars($book['ISBN']); ?></p>
+                                <p><strong>Genres:</strong> <?php echo htmlspecialchars($book['Genres'] ?? 'N/A'); ?></p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </main>
 
         <footer>
@@ -514,28 +486,10 @@ if ($is_librarian && isset($_SESSION['UserID'])) {
 
     <script>
         const sidebar = document.getElementById('sidebar');
-        const headerLogo = document.getElementById('headerLogo');
 
         function toggleSidebar() {
             sidebar.classList.toggle('closed');
-
-            if (sidebar.classList.contains('closed')) {
-                headerLogo.classList.add('visible');
-            } else {
-                headerLogo.classList.remove('visible');
-            }
         }
-
-        // Initial check to show the logo if the sidebar starts closed
-        if (sidebar.classList.contains('closed')) {
-            headerLogo.classList.add('visible');
-        }
-
-        // Theme toggle logic
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('change', () => {
-            document.body.classList.toggle('dark-theme');
-        });
 
         function toggleSublist(id) {
             const header = document.querySelector(`[aria-controls="${id}"]`);
@@ -547,12 +501,6 @@ if ($is_librarian && isset($_SESSION['UserID'])) {
             arrow.textContent = isExpanded ? '>' : 'v';
             sublist.hidden = isExpanded;
             sublist.classList.toggle('show');
-        }
-
-        // Librarian task box toggle
-        function toggleTaskBox() {
-            const taskBox = document.getElementById('taskBox');
-            taskBox.classList.toggle('collapsed');
         }
     </script>
 </body>
