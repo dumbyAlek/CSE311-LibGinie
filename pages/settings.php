@@ -10,12 +10,14 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 // Include your database configuration
 require_once '../backend/crud/db_config.php';
+require_once '../backend/crud/log_action.php';
 
 // Get user data from the session
 $user_id = $_SESSION['UserID'];
 $user_role = isset($_SESSION['membershipType']) ? $_SESSION['membershipType'] : 'guest';
 $is_guest = ($user_role === 'guest');
 $is_librarian = ($user_role === 'librarian');
+$is_admin = ($user_role === 'admin'); // Added variable for admin role
 
 // Initialize success and error messages
 $success_message = '';
@@ -63,6 +65,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $con->commit();
             $success_message = "Account information updated successfully!";
             $_SESSION['user_name'] = $name; // Update the session variable for the name
+            // Log the action: User updated account information
+            log_action($user_id, 'Account Update', 'User ' . $name . ' updated their account information.');
         } catch (mysqli_sql_exception $e) {
             $con->rollback();
             $error_message = "Error updating account: " . $e->getMessage();
@@ -89,6 +93,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_update->execute();
             $stmt_update->close();
             $success_message = "Password changed successfully!";
+            // Log the action: User changed their password
+            log_action($user_id, 'Password Change', 'User ' . $user_name . ' changed their password.');
         } else {
             $error_message = "Invalid current password.";
         }
@@ -114,6 +120,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $con->commit();
 
             session_destroy();
+            // Log the action: User deleted their account
+            log_action($user_id, 'Account Deletion', 'User ' . $user_name . ' deleted their account.');
             header("Location: ../pages/loginn.php?deleted=true");
             exit;
         } catch (mysqli_sql_exception $e) {
@@ -390,6 +398,19 @@ $con->close();
         .form-label {
             font-weight: 600;
         }
+        .settings-card .list-group-item a {
+            color: #000; /* Default link color for light theme */
+            text-decoration: none;
+        }
+        .dark-theme .settings-card .list-group-item a {
+            color: #fff; /* Link color for dark theme */
+        }
+        .settings-card .list-group-item:hover {
+            background-color: #f8f9fa;
+        }
+        .dark-theme .settings-card .list-group-item:hover {
+            background-color: #333;
+        }
 
         @media (max-width: 767px) {
             .sidebar {
@@ -420,7 +441,7 @@ $con->close();
             <?php if ($user_role === 'admin') : ?>
             <li><a href="../backend/BookMng.php">Book Management</a></li>
             <li><a href="../backend/BookMain.php">Book Maintenancet</a></li>
-            <li><a href="#">Sections & Shelves</a></li>
+            <li><a href="SecsNShelves.php">Sections & Shelves</a></li>
             <li><a href="../backend/MemMng.php">Member Management</a></li>
             <li><a href="EmpMng.html">Employee Management</a></li>
             <?php elseif ($is_librarian) : ?>
@@ -553,6 +574,17 @@ $con->close();
                     <button type="submit" class="btn btn-info">Change Password</button>
                 </form>
             </div>
+
+            <?php if ($is_admin): ?>
+            <h3 class="section-title">Website Management</h3>
+            <div class="settings-card">
+                <h4 class="mb-3">Administrative Tools</h4>
+                <div class="list-group">
+                    <a href="../backend/BackupNRestore.php" class="list-group-item list-group-item-action">Database Backup & Restore</a>
+                    <a href="../backend/SysLog.php" class="list-group-item list-group-item-action">System Logs</a>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <div class="settings-card bg-danger text-white">
                 <h4 class="mb-3">Delete Account</h4>

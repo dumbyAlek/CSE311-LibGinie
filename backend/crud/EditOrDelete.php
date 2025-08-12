@@ -32,10 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['isbn'])) {
         $book = $result->fetch_assoc();
 
         if ($book) {
-            echo json_encode(['success' => true, 'book' => $book]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Book not found.']);
-        }
+    // Force the Genres value to be a string
+    if ($book['Genres'] === null) {
+        $book['Genres'] = '';
+    }
+        echo json_encode(['success' => true, 'book' => $book]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Book not found.']);
+    }
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
