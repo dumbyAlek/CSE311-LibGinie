@@ -456,7 +456,7 @@ $con->close();
                 
                 <li><a href="../backend/BookMng.php">Book Management</a></li>
                 <li><a href="BookMain.php">Book Maintenance</a></li>
-                <li><a href="#">Sections & Shelves</a></li>
+                <li><a href="../pages/SecsNShelves.php">Sections & Shelves</a></li>
                 <li><a href="MemMng.php">Member Management</a></li>
                 <li><a href="EmpMng.php">Employee Management</a></li>
             <?php endif; ?>

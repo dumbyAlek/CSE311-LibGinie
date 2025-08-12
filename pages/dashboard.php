@@ -436,7 +436,7 @@ try {
             <?php if ($user_role === 'admin') : ?>
             <li><a href="../backend/BookMng.php">Book Management</a></li>
             <li><a href="../backend/BookMain.php">Book Maintenance</a></li>
-            <li><a href="#">Sections & Shelves</a></li>
+            <li><a href="SecsNShelves.php">Sections & Shelves</a></li>
             <li><a href="../backend/MemMng.php">Member Management</a></li>
             <li><a href="../backend/EmpMng.php">Employee Management</a></li>
             <?php elseif ($is_librarian) : ?>

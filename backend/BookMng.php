@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['query'])) {
     $search_query = '%' . $_GET['query'] . '%';
 
     try {
-        $stmt = $con->prepare("SELECT b.ISBN, b.Title, b.CoverPicture, b.Category, m.Name AS AuthorName FROM Books b JOIN Author a ON b.AuthorID = a.AuthorID JOIN Members m ON a.UserID = m.UserID WHERE b.Title LIKE ? OR b.ISBN LIKE ? OR m.Name LIKE ?");
+        $stmt = $con->prepare("SELECT b.ISBN, b.Title, b.CoverPicture, b.Category, m.Name AS AuthorName, a.AuthorTitle FROM Books b JOIN Author a ON b.AuthorID = a.AuthorID JOIN Members m ON a.UserID = m.UserID WHERE b.Title LIKE ? OR b.ISBN LIKE ? OR m.Name LIKE ?");
         $stmt->bind_param("sss", $search_query, $search_query, $search_query);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['query'])) {
                 'title' => $row['Title'],
                 'category' => $row['Category'],
                 'author_name' => $row['AuthorName'],
+                NULL => $row['AuthorTitle'],
                 'book_cover' => $row['CoverPicture']
             ];
         }
@@ -351,9 +352,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .sidebar-toggle-btn::before {
-            content: "☰";
+            content: "≡";
             color: white;
             font-size: 20px;
+            transform: rotate(90deg);
         }
 
         .content-wrapper {
@@ -540,8 +542,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if ($user_role === 'admin') : ?>
             <li><a href="BookMng.php">Book Management</a></li>
+            <li><a href="../backend/BookMain.php">Book Maintenance</a></li>
+            <li><a href="../pages/SecsNShelves.php">Sections & Shelves</a></li>
             <li><a href="../backend/MemMng.php">Member Management</a></li>
-            <li><a href="employee_management.html">Employee Management</a></li>
+            <li><a href="EmpMng.php">Employee Management</a></li>
             <?php elseif ($is_librarian) : ?>
             <li><a href="member_management.html">Member Management</a></li>
             <li><a href="#">Request Book</a></li>
@@ -618,7 +622,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label for="author_name" class="form-label">Author Name</label>
                         <input type="text" class="form-control" id="author_name" name="author_name" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group, mb-3">
                         <label for="category">Category</label>
                         <select class="form-control" id="category" name="category" required>
                             <option value="">Select a Category</option>
@@ -691,7 +695,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="modal-body">
                     <form id="editBookForm">
-                        <input type="hidden" id="editBookISBN" name="isbn">
+                        <div class="mb-3">
+                            <label for="editBookISBN" class="form-label">ISBN</label>
+                            <input type="text" class="form-control" id="editBookISBN" name="isbn" required>
+                        </div>
                         <div class="mb-3">
                             <label for="editTitle" class="form-label">Title</label>
                             <input type="text" class="form-control" id="editTitle" name="title" required>
@@ -712,7 +719,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="mb-3">
                             <label for="editSectionID" class="form-label">Section ID</label>
-                            <input type="number" class="form-control" id="editSectionID" name="section_id" required>
+                            <input type="number" class="form-control" id="editSectionID" name="section_id">
                         </div>
                         <div class="mb-3">
                             <label for="editGenres" class="form-label">Genre</label>
@@ -928,6 +935,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 document.getElementById('editTitle').value = book.Title;
                                 document.getElementById('editAuthorName').value = book.AuthorName;
                                 document.getElementById('editCategory').value = book.Category || '';
+                                document.getElementById('editSectionID').value = book.SectionID || '';
+                                document.getElementById('editGenres').value = book.Genres || '';
                                 document.getElementById('editPublisher').value = book.Publisher || '';
                                 document.getElementById('editPublishedYear').value = book.PublishedYear || '';
                                 document.getElementById('editCoverPicture').value = book.CoverPicture || '';
