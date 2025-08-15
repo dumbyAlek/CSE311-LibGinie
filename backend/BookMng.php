@@ -62,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = $data['description'] ?? null; 
 
         try {
-            //Test Add Start
             // Validate or create section
                 if (!empty($section_id) && is_numeric($section_id)) {
                     $stmt_check_section = $con->prepare("SELECT SectionID FROM Library_Sections WHERE SectionID = ?");

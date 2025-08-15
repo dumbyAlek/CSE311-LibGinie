@@ -25,7 +25,7 @@ $sql = "
 $params = [];
 $types = '';
 
-// Add search condition
+// Add search condition for Title, Author Name, and ISBN
 if (!empty($search_term)) {
     $sql .= " AND (b.Title LIKE ? OR m.Name LIKE ? OR b.ISBN LIKE ?)";
     $search_param = '%' . $search_term . '%';
@@ -65,16 +65,10 @@ if (!empty($publishers)) {
     }
 }
 
-// Add author filter
+// Add author filter (correct way)
 if (!empty($authors)) {
     $placeholders = implode(',', array_fill(0, count($authors), '?'));
-    $sql .= " AND m.UserID IN (
-        SELECT a.UserID 
-        FROM Author a 
-        JOIN Members m 
-        ON a.UserID = m.UserID 
-        WHERE m.Name IN ($placeholders)
-    )";
+    $sql .= " AND m.Name IN ($placeholders)";
     foreach ($authors as $author) {
         $params[] = $author;
         $types .= 's';
@@ -88,6 +82,7 @@ $sql .= " GROUP BY b.ISBN ORDER BY b.Title";
 $stmt = $con->prepare($sql);
 
 if ($types) {
+    // Correctly bind parameters
     $stmt->bind_param($types, ...$params);
 }
 

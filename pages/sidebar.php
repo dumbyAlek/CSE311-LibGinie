@@ -1,7 +1,3 @@
-<?php 
-// This file assumes the following variables are already set in the including file:
-// $is_guest, $is_librarian, $user_role
-?>
 
 <?php if (!$is_guest) : // Main sidebar for all logged-in users ?>
 <nav class="sidebar closed" id="sidebar">
@@ -10,7 +6,7 @@
     <ul>
         <li><a href="dashboard.php">Dashboard</a></li>
         <li><a href="#">My Books</a></li>
-        <li><a href="#">Favorites</a></li>
+        <li><a href="#">Borrow and Reserve Books</a></li>
 
         <?php if ($user_role === 'admin') : ?>
         <li><a href="../backend/BookMng.php">Book Management</a></li>
@@ -20,7 +16,7 @@
         <li><a href="../backend/EmpMng.php">Employee Management</a></li>
         <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
         <li><a href="#">Request Book</a></li>
-        <li><a href="#">Borrow and Reserve Books</a></li>
+        
         <?php endif; ?>
 
         <?php if ($user_role === 'author') : ?>

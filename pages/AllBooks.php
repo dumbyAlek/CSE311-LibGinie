@@ -420,16 +420,33 @@ $con->close();
             // Initial load of all books
             fetchBooks();
 
-            // Search functionality
-            bookSearchInput.on('keyup', function() {
-                const searchTerm = $(this).val();
-                if (searchTerm.length >= 3 || searchTerm.length === 0) {
-                    fetchBooks({
-                        search: searchTerm
-                    });
-                }
-                updateFilterIconColor();
-            });
+            // Live search functionality with debounce
+                let typingTimer; // A timer to debounce the search
+                const doneTypingInterval = 250; // 500ms delay after typing stops
+
+                bookSearchInput.on('keyup', function() {
+                    clearTimeout(typingTimer);
+                    typingTimer = setTimeout(function() {
+                        const searchTerm = bookSearchInput.val();
+                        fetchBooks({
+                            search: searchTerm
+                        });
+                        updateFilterIconColor();
+                    }, doneTypingInterval);
+                });
+
+                // Handle 'Enter' key press on the search input
+                bookSearchInput.on('keypress', function(e) {
+                    if (e.which === 13) {
+                        e.preventDefault(); // Prevents page reload
+                        clearTimeout(typingTimer); // Clear any pending debounced search
+                        const searchTerm = $(this).val();
+                        fetchBooks({
+                            search: searchTerm
+                        });
+                        updateFilterIconColor();
+                    }
+                });
 
             // Apply Filters button click
             applyFiltersBtn.on('click', function() {

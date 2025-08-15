@@ -38,7 +38,11 @@ $is_librarian = ($user_role === 'librarian');
             color: #eee;
         }
 
+        /* sidebarstart  */
+
         .sidebar {
+            background-color: rgba(0, 0, 0, 0.4); /* Dark overlay */
+            background-blend-mode: multiply;
             position: fixed;
             top: 0;
             left: 0;
@@ -74,14 +78,16 @@ $is_librarian = ($user_role === 'librarian');
             margin-top: 30px;
         }
 
+        /* controlling space between sidebar links */
         .sidebar li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem; 
         }
 
         .sidebar a {
             text-decoration: none;
             color: white;
-            font-size: 1.1rem;
+            font-weight: 500;
+            font-size: 1.2rem;
             padding: 8px 12px;
             display: block;
             border-radius: 4px;
@@ -145,6 +151,12 @@ $is_librarian = ($user_role === 'librarian');
         .sidebar.closed ~ .content-wrapper {
             margin-left: 0;
         }
+
+        .sidebar.closed ~ .content-wrapper .bg-header {
+            margin-left: 0;
+        }
+
+        /* sidebarend */
 
         .bg-header {
             background-image: url('../images/header.jpg');
