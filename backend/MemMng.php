@@ -106,7 +106,7 @@ $con->close();
             z-index: 1050;
             width: var(--sidebar-width);
             height: 100vh;
-            background-image: url('../../images/sidebar.jpg');
+            background-image: url('../images/sidebar.jpg');
             background-size: cover;
             background-position: center;
             padding: 20px;
@@ -114,14 +114,12 @@ $con->close();
             overflow-y: auto;
             transition: transform 0.3s ease-in-out;
         }
-
         .sidebar.closed {
             transform: translateX(calc(-1 * var(--sidebar-width)));
         }
-
         .sidebar .logo {
-            max-width: 150px;
-            margin: 10px auto;
+            max-width: 200px;
+            margin: 20px auto;
             display: block;
         }
 
@@ -132,18 +130,18 @@ $con->close();
         .sidebar ul {
             list-style: none;
             padding-left: 0;
-            margin-top: 20px;
+            margin-top: 30px;
         }
 
         .sidebar li {
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
         }
 
         .sidebar a {
             text-decoration: none;
             color: white;
-            font-size: 1rem;
-            padding: 6px 10px;
+            font-size: 1.1rem;
+            padding: 8px 12px;
             display: block;
             border-radius: 4px;
             transition: background-color 0.3s ease;
@@ -152,21 +150,21 @@ $con->close();
         .sidebar a:hover {
             background-color: rgba(255, 255, 255, 0.15);
         }
-        
+
         .sidebar .collapsible-header {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: bold;
             display: flex;
             align-items: center;
             cursor: pointer;
-            padding: 6px 10px;
+            padding: 8px 12px;
             color: white;
             border-radius: 4px;
         }
 
         .sidebar ul.sublist {
-            padding-left: 15px;
-            margin-top: 3px;
+            padding-left: 20px;
+            margin-top: 5px;
             display: none;
         }
 
@@ -200,11 +198,7 @@ $con->close();
         .content-wrapper {
             margin-left: var(--sidebar-width);
             transition: margin-left 0.3s;
-        }
-        
-        .content-wrapper-no-sidebar {
-            margin-left: 0;
-            padding-left: 70px;
+            padding-top: 60px;
         }
 
         .sidebar.closed ~ .content-wrapper {
@@ -328,53 +322,7 @@ $con->close();
 <body>
     <button class="sidebar-toggle-btn"></button>
 
-    <nav class="sidebar closed" id="sidebar">
-        <a href="../pages/home.php"><img src="../../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="../pages/dashboard.php">Dashboard</a></li>
-            <li><a href="#">My Books</a></li>
-            <li><a href="#">Favorites</a></li>
-
-            <?php if ($is_admin) : ?>
-            <li><a href="BookMng.php">Book Management</a></li>
-            <li><a href="BookMain.php">Book Maintenance</a></li>
-            <li><a href="#">Sections & Shelves</a></li>
-            <li><a href="MemMng.php">Member Management</a></li>
-            <li><a href="EmpMng.php">Employee Management</a></li>
-            <?php elseif ($is_librarian) : ?>
-            <li><a href="MemMng.php">Member Management</a></li>
-            <li><a href="#">Request Book</a></li>
-            <?php else : ?>
-            <li><a href="#">Request Book</a></li>
-            <li><a href="#">Borrowed Books</a></li>
-            <?php endif; ?>
-            
-            
-            <li class="collapsible-header" onclick="toggleSublist('categoryList')" aria-expanded="false" aria-controls="categoryList">
-                <span class="arrow">></span> Categories
-            </li>
-            <ul class="sublist" id="categoryList" hidden>
-                <li><a href="../pages/categories.php?category=Text Books">Text Books</a></li>
-                <li><a href="../pages/categories.php?category=Comics">Comics</a></li>
-                <li><a href="../pages/categories.php?category=Novels">Novels</a></li>
-                <li><a href="../pages/categories.php?category=Magazines">Magazines</a></li>
-            </ul>
-
-            <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
-                <span class="arrow">></span> Genres
-            </li>
-            <ul class="sublist" id="genreList" hidden>
-                <li><a href="#">Fantasy</a></li>
-                <li><a href="#">Horror</a></li>
-                <li><a href="#">Romance</a></li>
-                <li><a href="#">[Browse All Genres]</a></li>
-            </ul>
-            
-            <li><a href="#">Reserved</a></li>
-            <li><a href="../pages/settings.php">Settings</a></li>
-            <li><a href="logout.php">Logout</a></li>
-        </ul>
-    </nav>
+    <?php include 'sidebar.php'; ?>
 
     <div class="theme-switch-wrapper">
         <label class="theme-switch" for="theme-switch">
