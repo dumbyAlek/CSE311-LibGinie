@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS Books (
     Category VARCHAR(50),
     Publisher VARCHAR(100),
     PublishedYear YEAR,
+    Description TEXT,
     CoverPicture VARCHAR(255),
     FOREIGN KEY (AuthorID) REFERENCES Author(AuthorID),
     FOREIGN KEY (SectionID) REFERENCES Library_Sections(SectionID)
@@ -244,14 +245,18 @@ FROM
     Borrow;
 
     
--- 28. Keep track of viewed books
-CREATE TABLE BookViews (
-    ViewID INT AUTO_INCREMENT PRIMARY KEY,
+-- 28. Keep track of viewed books, read books, favorites and wishlist
+CREATE TABLE IF NOT EXISTS BookInteractions (
+    InteractionID INT PRIMARY KEY AUTO_INCREMENT,
     UserID INT NOT NULL,
-    ISBN VARCHAR(13) NOT NULL,
-    ViewDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ISBN VARCHAR(20) NOT NULL,
+    IsFavorite BOOLEAN DEFAULT FALSE,
+    InWishlist BOOLEAN DEFAULT FALSE,
+    IsRead BOOLEAN DEFAULT FALSE,
+    LastViewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (UserID) REFERENCES Members(UserID),
-    FOREIGN KEY (ISBN) REFERENCES Books(ISBN)
+    FOREIGN KEY (ISBN) REFERENCES Books(ISBN),
+    UNIQUE KEY (UserID, ISBN)
 );
 
 -- 29. Keep track of added books
@@ -259,8 +264,19 @@ CREATE TABLE IF NOT EXISTS BooksAdded (
     ISBN VARCHAR(20) NOT NULL,
     UserID INT NOT NULL,
     AddDate DATE NOT NULL,
-    IsRead BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (ISBN, UserID),
     FOREIGN KEY (ISBN) REFERENCES Books(ISBN),
     FOREIGN KEY (UserID) REFERENCES Admin(UserID)
+);
+
+-- 30. Keep track of Reviews
+CREATE TABLE IF NOT EXISTS BookReviews (
+    ReviewID INT PRIMARY KEY AUTO_INCREMENT,
+    ISBN VARCHAR(20) NOT NULL,
+    UserID INT,
+    Rating INT,
+    ReviewText TEXT,
+    ReviewTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ISBN) REFERENCES Books(ISBN),
+    FOREIGN KEY (UserID) REFERENCES Members(UserID)
 );
