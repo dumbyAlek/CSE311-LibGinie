@@ -16,11 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['isbn'])) {
                 b.Publisher, 
                 b.PublishedYear, 
                 b.SectionID, 
+                b.Description,
                 m.Name AS AuthorName, 
                 GROUP_CONCAT(g.GenreName SEPARATOR ', ') AS Genres 
             FROM Books b 
-            JOIN Author a ON b.AuthorID = a.AuthorID 
-            JOIN Members m ON a.UserID = m.UserID
+            LEFT JOIN Author a ON b.AuthorID = a.AuthorID 
+            LEFT JOIN Members m ON a.UserID = m.UserID
             LEFT JOIN Book_Genres bg ON b.ISBN = bg.ISBN
             LEFT JOIN Genres g ON bg.GenreID = g.GenreID
             WHERE b.ISBN = ?
@@ -62,69 +63,103 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cover_picture = $data['cover_picture'] ?? null;
         $section_id = $data['section_id'];
         $genres = isset($data['genres']) ? explode(',', $data['genres']) : [];
+        $description = $data['description'] ?? null;
 
         try {
             // Find or create AuthorID based on the new author_name
             $author_id = null;
             $stmt_author = $con->prepare("
-                SELECT a.AuthorID FROM Author a 
+                SELECT a.AuthorID, m.UserID
+                FROM Author a 
                 JOIN Members m ON a.UserID = m.UserID 
                 WHERE m.Name = ?
             ");
             $stmt_author->bind_param("s", $author_name);
             $stmt_author->execute();
             $result_author = $stmt_author->get_result();
+
             if ($row_author = $result_author->fetch_assoc()) {
                 $author_id = $row_author['AuthorID'];
             } else {
-                // If author doesn't exist, create a new Member and Author record
-                $stmt_member = $con->prepare("INSERT INTO Members (Name, Email, MembershipType) VALUES (?, ?, 'Registered')");
-                $email = str_replace(' ', '.', strtolower($author_name)) . '@example.com';
-                $stmt_member->bind_param("ss", $author_name, $email);
-                $stmt_member->execute();
-                $new_user_id = $stmt_member->insert_id;
-                $stmt_member->close();
+                // If no Author found with this name, check if a general Member with this name exists
+                $stmt_check_member = $con->prepare("SELECT UserID FROM Members WHERE Name = ?");
+                $stmt_check_member->bind_param("s", $author_name);
+                $stmt_check_member->execute();
+                $result_member = $stmt_check_member->get_result();
 
-                $stmt_reg = $con->prepare("INSERT INTO Registered (UserID, RegistrationDate) VALUES (?, NOW())");
-                $stmt_reg->bind_param("i", $new_user_id);
-                $stmt_reg->execute();
-                $stmt_reg->close();
+                if ($row_member = $result_member->fetch_assoc()) {
+                    // Member exists, so promote them to an Author
+                    $new_user_id = $row_member['UserID'];
+                    // Ensure they are also in the Registered table before making them an Author
+                    $stmt_check_reg = $con->prepare("SELECT UserID FROM Registered WHERE UserID = ?");
+                    $stmt_check_reg->bind_param("i", $new_user_id);
+                    $stmt_check_reg->execute();
+                    $result_reg = $stmt_check_reg->get_result();
 
-                $stmt_new_author = $con->prepare("INSERT INTO Author (UserID) VALUES (?)");
-                $stmt_new_author->bind_param("i", $new_user_id);
-                $stmt_new_author->execute();
-                $author_id = $stmt_new_author->insert_id;
-                $stmt_new_author->close();
+                    if ($result_reg->num_rows === 0) {
+                        $stmt_insert_reg = $con->prepare("INSERT INTO Registered (UserID, RegistrationDate) VALUES (?, NOW())");
+                        $stmt_insert_reg->bind_param("i", $new_user_id);
+                        $stmt_insert_reg->execute();
+                        $stmt_insert_reg->close();
+                    }
+                    $stmt_check_reg->close();
+
+                    $stmt_new_author = $con->prepare("INSERT INTO Author (UserID) VALUES (?)");
+                    $stmt_new_author->bind_param("i", $new_user_id);
+                    $stmt_new_author->execute();
+                    $author_id = $stmt_new_author->insert_id;
+                    $stmt_new_author->close();
+                } else {
+                    // Neither Member nor Author exists, so create all necessary records
+                    $stmt_member = $con->prepare("INSERT INTO Members (Name, Email, MembershipType) VALUES (?, ?, 'Registered')");
+                    $email = str_replace(' ', '.', strtolower($author_name)) . '@example.com';
+                    $stmt_member->bind_param("ss", $author_name, $email);
+                    $stmt_member->execute();
+                    $new_user_id = $stmt_member->insert_id;
+                    $stmt_member->close();
+
+                    $stmt_reg = $con->prepare("INSERT INTO Registered (UserID, RegistrationDate) VALUES (?, NOW())");
+                    $stmt_reg->bind_param("i", $new_user_id);
+                    $stmt_reg->execute();
+                    $stmt_reg->close();
+
+                    $stmt_new_author = $con->prepare("INSERT INTO Author (UserID) VALUES (?)");
+                    $stmt_new_author->bind_param("i", $new_user_id);
+                    $stmt_new_author->execute();
+                    $author_id = $stmt_new_author->insert_id;
+                    $stmt_new_author->close();
+                }
+                $stmt_check_member->close();
             }
             $stmt_author->close();
-            
-            // Validate or create section
-if (!empty($section_id) && is_numeric($section_id)) {
-    $stmt_check_section = $con->prepare("SELECT SectionID FROM Library_Sections WHERE SectionID = ?");
-    $stmt_check_section->bind_param("i", $section_id);
-    $stmt_check_section->execute();
-    $result_check_section = $stmt_check_section->get_result();
+                        
+                        // Validate or create section
+            if (!empty($section_id) && is_numeric($section_id)) {
+                $stmt_check_section = $con->prepare("SELECT SectionID FROM Library_Sections WHERE SectionID = ?");
+                $stmt_check_section->bind_param("i", $section_id);
+                $stmt_check_section->execute();
+                $result_check_section = $stmt_check_section->get_result();
 
-    if ($result_check_section->num_rows === 0) {
-        // Let MySQL assign the ID if table uses AUTO_INCREMENT
-        $new_section_name = "Section " . $section_id;
-        $stmt_create_section = $con->prepare("INSERT INTO Library_Sections (Name) VALUES (?)");
-        $stmt_create_section->bind_param("s", $new_section_name);
-        $stmt_create_section->execute();
-        $section_id = $stmt_create_section->insert_id; // Use the real SectionID
-        $stmt_create_section->close();
-    }
-    $stmt_check_section->close();
-} else {
-    echo json_encode(['success' => false, 'message' => 'Invalid Section ID']);
-    exit;
-}
+                if ($result_check_section->num_rows === 0) {
+                    // Let MySQL assign the ID if table uses AUTO_INCREMENT
+                    $new_section_name = "Section " . $section_id;
+                    $stmt_create_section = $con->prepare("INSERT INTO Library_Sections (Name) VALUES (?)");
+                    $stmt_create_section->bind_param("s", $new_section_name);
+                    $stmt_create_section->execute();
+                    $section_id = $stmt_create_section->insert_id; // Use the real SectionID
+                    $stmt_create_section->close();
+                }
+                $stmt_check_section->close();
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Invalid Section ID']);
+                exit;
+            }
 
 
             // Update the main Books table
-            $update_query = "UPDATE Books SET Title = ?, AuthorID = ?, SectionID = ?, Category = ?, Publisher = ?, PublishedYear = ?";
-            $params = [$title, $author_id, $section_id, $category, $publisher, $published_year];
-            $types = "siissi";
+            $update_query = "UPDATE Books SET Title = ?, AuthorID = ?, SectionID = ?, Category = ?, Publisher = ?, PublishedYear = ?, Description = ?";
+            $params = [$title, $author_id, $section_id, $category, $publisher, $published_year, $description];
+            $types = "siissis"; 
             
             if ($cover_picture) {
                 $update_query .= ", CoverPicture = ?";
@@ -268,10 +303,10 @@ if (!empty($section_id) && is_numeric($section_id)) {
             $stmt_del_textbook->execute();
             $stmt_del_textbook->close();
 
-            $stmt_del_views = $con->prepare("DELETE FROM BookViews WHERE ISBN = ?");
-            $stmt_del_views->bind_param("s", $isbn);
-            $stmt_del_views->execute();
-            $stmt_del_views->close();
+            $stmt_del_interactions = $con->prepare("DELETE FROM BookInteractions WHERE ISBN = ?");
+            $stmt_del_interactions->bind_param("s", $isbn);
+            $stmt_del_interactions->execute();
+            $stmt_del_interactions->close();
             
             $stmt_del_copy_reserve = $con->prepare("DELETE FROM Reservation WHERE CopyID IN (SELECT CopyID FROM BookCopy WHERE ISBN = ?)");
             $stmt_del_copy_reserve->bind_param("s", $isbn);
@@ -292,6 +327,12 @@ if (!empty($section_id) && is_numeric($section_id)) {
             $stmt_del_copy->bind_param("s", $isbn);
             $stmt_del_copy->execute();
             $stmt_del_copy->close();
+
+            // Delete from BookReviews
+            $stmt_del_reviews = $con->prepare("DELETE FROM BookReviews WHERE ISBN = ?");
+            $stmt_del_reviews->bind_param("s", $isbn);
+            $stmt_del_reviews->execute();
+            $stmt_del_reviews->close();
 
 
             // Finally, delete the book itself

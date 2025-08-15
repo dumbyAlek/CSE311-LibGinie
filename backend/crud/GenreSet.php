@@ -2,7 +2,7 @@
 // genreSet.php
 
 // Include your database configuration
-require_once '../backend/crud/db_config.php';
+require_once 'db_config.php';
 
 // Array of default genre names to add
 $default_genres = [
@@ -25,7 +25,8 @@ $default_genres = [
     'Adult Fiction',
     'Superhero',
     'Tragedy',
-    'Comedy'
+    'Comedy',
+    'Classic'
 ];
 
 echo "<h2>Setting up default genres...</h2>";

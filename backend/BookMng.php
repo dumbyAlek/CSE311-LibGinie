@@ -9,16 +9,6 @@ $user_role = isset($_SESSION['membershipType']) ? $_SESSION['membershipType'] : 
 $is_guest = ($user_role === 'guest');
 $is_librarian = ($user_role === 'librarian');
 
-// This part is for dynamic librarian tasks, included for consistency
-if ($is_librarian) {
-    $librarian_tasks = [
-        'Shelve new arrivals in the Fantasy section.',
-        'Inventory check of Fiction section.',
-        'Assist with student library orientation.'
-    ];
-    $assigned_section = 'Fantasy';
-}
-
 require_once 'crud/db_config.php';
 
 // === SEARCH BOOKS LOGIC ===
@@ -28,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['query'])) {
     $search_query = '%' . $_GET['query'] . '%';
 
     try {
-        $stmt = $con->prepare("SELECT b.ISBN, b.Title, b.CoverPicture, b.Category, m.Name AS AuthorName, a.AuthorTitle FROM Books b JOIN Author a ON b.AuthorID = a.AuthorID JOIN Members m ON a.UserID = m.UserID WHERE b.Title LIKE ? OR b.ISBN LIKE ? OR m.Name LIKE ?");
+        $stmt = $con->prepare("SELECT b.ISBN, b.Title, b.CoverPicture, b.Category, m.Name AS AuthorName, a.AuthorTitle, b.Description FROM Books b LEFT JOIN Author a ON b.AuthorID = a.AuthorID LEFT JOIN Members m ON a.UserID = m.UserID WHERE b.Title LIKE ? OR b.ISBN LIKE ? OR m.Name LIKE ?");
         $stmt->bind_param("sss", $search_query, $search_query, $search_query);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -40,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['query'])) {
                 'title' => $row['Title'],
                 'category' => $row['Category'],
                 'author_name' => $row['AuthorName'],
-                NULL => $row['AuthorTitle'],
-                'book_cover' => $row['CoverPicture']
+                'book_cover' => $row['CoverPicture'],
+                'description' => $row['Description']
             ];
         }
         
@@ -69,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cover_picture = $data['cover_picture'];
         $section_id = $data['section_id']; 
         $genres = isset($data['genres']) ? explode(',', $data['genres']) : [];
+        $description = $data['description'] ?? null; 
 
         try {
             //Test Add Start
@@ -146,11 +137,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Step 4: Insert the new book using the AuthorID and SectionID
             if ($author_id) {
-                $stmt = $con->prepare("INSERT INTO Books (ISBN, Title, AuthorID, SectionID, Category, Publisher, PublishedYear, CoverPicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                $stmt->bind_param("ssiissis", $isbn, $title, $author_id, $section_id, $category, $publisher, $published_year, $cover_picture);
+                $stmt = $con->prepare("INSERT INTO Books (ISBN, Title, AuthorID, SectionID, Category, Publisher, PublishedYear, Description, CoverPicture) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param("ssiississ", $isbn, $title, $author_id, $section_id, $category, $publisher, $published_year, $description, $cover_picture);
 
                 if ($stmt->execute()) {
-                    // New: Insert into the correct specialized table based on category
                     if ($category === 'Text Books') {
                         $stmt_insert = $con->prepare("INSERT INTO TextBook (ISBN) VALUES (?)");
                         $stmt_insert->bind_param("s", $isbn);
@@ -267,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             z-index: 1050;
             width: var(--sidebar-width);
             height: 100vh;
-            background-image: url('../../images/sidebar.jpg');
+            background-image: url('../images/sidebar.jpg');
             background-size: cover;
             background-position: center;
             padding: 20px;
@@ -275,11 +265,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             overflow-y: auto;
             transition: transform 0.3s ease-in-out;
         }
-
         .sidebar.closed {
             transform: translateX(calc(-1 * var(--sidebar-width)));
         }
-
         .sidebar .logo {
             max-width: 200px;
             margin: 20px auto;
@@ -531,69 +519,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
+    
 
-    <?php if (!$is_guest) : // Main sidebar for all logged-in users ?>
-    <nav class="sidebar closed" id="sidebar">
-        <a href="../pages/home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="../../pages/dashboard.php">Dashboard</a></li>
-            <li><a href="#">My Books</a></li>
-            <li><a href="#">Favorites</a></li>
-
-            <?php if ($user_role === 'admin') : ?>
-            <li><a href="BookMng.php">Book Management</a></li>
-            <li><a href="../backend/BookMain.php">Book Maintenance</a></li>
-            <li><a href="../pages/SecsNShelves.php">Sections & Shelves</a></li>
-            <li><a href="../backend/MemMng.php">Member Management</a></li>
-            <li><a href="EmpMng.php">Employee Management</a></li>
-            <?php elseif ($is_librarian) : ?>
-            <li><a href="member_management.html">Member Management</a></li>
-            <li><a href="#">Request Book</a></li>
-            <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
-            <li><a href="#">Request Book</a></li>
-            <li><a href="#">Borrowed Books</a></li>
-            <?php endif; ?>
-
-            <?php if ($user_role === 'author') : ?>
-            <li><a href="author_account.html">My Account</a></li>
-            <?php endif; ?>
-            
-            <li class="collapsible-header" onclick="toggleSublist('categoryList')" aria-expanded="false" aria-controls="categoryList">
-                <span class="arrow">></span> Categories
-            </li>
-            <ul class="sublist" id="categoryList" hidden>
-                <li><a href="../pages/categories.php?category=Text Books">Text Books</a></li>
-                <li><a href="../pages/categories.php?category=Comics">Comics</a></li>
-                <li><a href="../pages/categories.php?category=Novels">Novels</a></li>
-                <li><a href="../pages/categories.php?category=Magazines">Magazines</a></li>
-            </ul>
-
-            <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
-                <span class="arrow">></span> Genres
-            </li>
-            <ul class="sublist" id="genreList" hidden>
-                <li><a href="#">Fantasy</a></li>
-                <li><a href="#">Horror</a></li>
-                <li><a href="#">Romance</a></li>
-                <li><a href="#">[Browse All Genres]</a></li>
-            </ul>
-            
-            <li><a href="#">Reserved</a></li>
-            <li><a href="../../pages/settings.php">Settings</a></li>
-            <li><a href="../logout.php">Logout</a></li>
-        </ul>
-    </nav>
-    <?php else: // Sidebar for Guest users only ?>
-    <nav class="sidebar closed" id="sidebar">
-        <img src="../../images/logo3.png" alt="Logo" class="logo" />
-        <ul>
-            <li><a href="signup.php">Sign Up</a></li>
-            <li><a href="#" class="disabled-link">Reserved</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="login.php">Log In</a></li>
-        </ul>
-    </nav>
-    <?php endif; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div class="content-wrapper content-wrapper-no-sidebar">
         <div class="theme-switch-wrapper">
@@ -647,6 +575,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="mb-3">
                         <label for="published_year" class="form-label">Published Year</label>
                         <input type="number" class="form-control" id="published_year" name="published_year">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="copies">Number of Copies:</label>
+                        <input type="number" class="form-control" id="copies" name="copies" min="0" required>
                     </div>
                     <div class="mb-3">
                         <label for="book_cover" class="form-label">Book Cover Image</label>
@@ -734,6 +670,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="number" class="form-control" id="editPublishedYear" name="published_year">
                         </div>
                         <div class="mb-3">
+                            <label for="editDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCopies" class="form-label">Number of Copies</label>
+                            <input type="number" class="form-control" id="editCopies" name="editCopies" min="0" required>
+                        </div>
+                        <div class="mb-3">
                             <label for="editCoverPicture" class="form-label">Book Cover Image</label>
                             <input class="form-control" type="file" id="editCoverPicture" name="cover_picture" accept="image/*">
                             <small class="form-text text-muted">Leave blank to keep the current image.</small>
@@ -753,6 +697,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
         const sidebar = document.getElementById('sidebar');
+        //Changing now
+        const modalBodyEl = document.querySelector('#editDeleteModal .modal-body');
+        const originalModalBodyHTML = modalBodyEl.innerHTML;
 
         function toggleSidebar() {
             sidebar.classList.toggle('closed');
@@ -797,8 +744,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 try {
                     const response = await fetch(url);
                     const result = await response.json();
-                    
-                    booksTableBody.innerHTML = ''; // Clear table
+
+                    booksTableBody.innerHTML = ''; //Clear the Table Body
                     
                     if (result.success && result.books.length > 0) {
                         result.books.forEach(book => {
@@ -833,6 +780,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     const form = event.target;
                     const formData = new FormData(form);
                     const bookCover = formData.get('book_cover');
+                    const numberOfCopies = formData.get('copies');
                     let coverUrl = '';
 
                     // Handle image upload first
@@ -876,19 +824,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 publisher: formData.get('publisher'),
                                 published_year: formData.get('published_year'),
                                 cover_picture: coverUrl,
-                                section_id: formData.get('section_id'), // New
-                                genres: formData.get('genres') // New
+                                section_id: formData.get('section_id'), 
+                                genres: formData.get('genres'),
+                                description: formData.get('description')
                             })
                         });
                         const result = await response.json();
 
                         if (result.success) {
-                            alert('Book added successfully!');
-                            form.reset();
-                            fetchBooks(); // Refresh the book list
-                        } else {
-                            alert('Failed to add book: ' + result.message);
-                        }
+    
+                    // Use a simple URL to call CopyCRUD.php
+                    const copiesResponse = await fetch(`crud/CopyCRUD.php?isbn=${formData.get('isbn')}&copies=${formData.get('copies')}`);
+                    const copiesResult = await copiesResponse.json();
+
+                    if (copiesResult.success) {
+                        alert('Book and copies added successfully!');
+                        form.reset();
+                        fetchBooks(); 
+                    } else {
+                        alert('Book added successfully, but failed to create copies: ' + copiesResult.message);
+                    }
+                } else {
+                    alert('Failed to add book: ' + result.message);
+                }
                     } catch (error) {
                         alert('An error occurred while adding the book.');
                         console.error(error);
@@ -915,8 +873,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 booksTableBody.addEventListener('click', async (event) => {
                     const isbn = event.target.getAttribute('data-isbn');
                     if (!isbn) return;
+                    console.log('Clicked edit/delete. ISBN:', isbn);
 
                     if (event.target.classList.contains('edit-btn')) {
+                        modalBodyEl.innerHTML = originalModalBodyHTML;
                         const modalTitle = document.getElementById('editDeleteModalLabel');
                         const saveBtn = document.getElementById('saveEditBtn');
                         const deleteBtn = document.getElementById('deleteBookBtn');
@@ -939,14 +899,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 document.getElementById('editGenres').value = book.Genres || '';
                                 document.getElementById('editPublisher').value = book.Publisher || '';
                                 document.getElementById('editPublishedYear').value = book.PublishedYear || '';
-                                document.getElementById('editCoverPicture').value = book.CoverPicture || '';
+                                document.getElementById('editDescription').value = book.Description || '';
+                                
+                                // Fetch the number of copies for the book
+                                const copiesResponse = await fetch(`crud/get_copies.php?isbn=${isbn}`);
+                                const copiesResult = await copiesResponse.json();
+                                
+
+                                if (copiesResult.success) {
+                                    // Populate the 'copies' input field with the fetched number
+                                    // Ensure your input field has the ID 'editCopies'
+                                    document.getElementById('editCopies').value = copiesResult.copies;
+                                } else {
+                                    console.error('Error fetching copies:', copiesResult.message);
+                                    document.getElementById('editCopies').value = 0; // Default to 0 on failure
+                                }
+
+
                             } else {
                                 alert('Error fetching book details: ' + result.message);
                                 editModal.hide();
                             }
                         } catch (error) {
                             console.error('Error fetching book data:', error);
-                            // alert('Failed to fetch book data.');
+                            //alert('Failed to fetch book data.');
                             editModal.hide();
                         }
                     } else if (event.target.classList.contains('delete-btn')) {
@@ -965,85 +941,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Event listener for the "Save Changes" button in the modal
-if (saveEditBtn) {
-    saveEditBtn.addEventListener('click', async () => {
-        const isbn = document.getElementById('editBookISBN').value;
-        const title = document.getElementById('editTitle').value;
-        const author_name = document.getElementById('editAuthorName').value;
-        const category = document.getElementById('editCategory').value;
-        const publisher = document.getElementById('editPublisher').value;
-        const published_year = document.getElementById('editPublishedYear').value;
-        const section_id = document.getElementById('editSectionID').value; // New
-        const genres = document.getElementById('editGenres').value; // New
-        const bookCoverFile = document.getElementById('editCoverPicture').files[0];
-        let cover_picture = null;
-        // Check if a new image file has been selected
-        if (bookCoverFile) {
-            const uploadFormData = new FormData();
-            uploadFormData.append('book_cover', bookCoverFile);
+            if (saveEditBtn) {
+                saveEditBtn.addEventListener('click', async () => {
+                    const isbn = document.getElementById('editBookISBN').value;
+                    const title = document.getElementById('editTitle').value;
+                    const author_name = document.getElementById('editAuthorName').value;
+                    const category = document.getElementById('editCategory').value;
+                    const publisher = document.getElementById('editPublisher').value;
+                    const published_year = document.getElementById('editPublishedYear').value;
+                    const section_id = document.getElementById('editSectionID').value; 
+                    const genres = document.getElementById('editGenres').value;
+                    const description = document.getElementById('editDescription').value;
+                    const bookCoverFile = document.getElementById('editCoverPicture').files[0];
+                    const newCopies = document.getElementById('editCopies').value;
+                    let cover_picture = null;
+                    // Check if a new image file has been selected
+                    if (bookCoverFile) {
+                        const uploadFormData = new FormData();
+                        uploadFormData.append('book_cover', bookCoverFile);
 
-            try {
-                // Upload the new image
-                const uploadResponse = await fetch('crud/upload_image.php', {
-                    method: 'POST',
-                    body: uploadFormData
-                });
-                const uploadResult = await uploadResponse.json();
+                        try {
+                            // Upload the new image
+                            const uploadResponse = await fetch('crud/upload_image.php', {
+                                method: 'POST',
+                                body: uploadFormData
+                            });
+                            const uploadResult = await uploadResponse.json();
 
-                if (uploadResult.success) {
-                    cover_picture = uploadResult.url;
+                            if (uploadResult.success) {
+                                cover_picture = uploadResult.url;
+                                fetchBooks(); // Refresh the list
+                            } else {
+                                alert('Image upload failed: ' + uploadResult.message);
+                                return; // Stop the process if the upload fails
+                            }
+                        } catch (error) {
+                            alert('An error occurred during image upload.');
+                            console.error(error);
+                            return; // Stop the process on error
+                        }
+                    }
+                    
+                    // Prepare the data to update the book, using the new URL or the existing one
+                    const updateData = {
+                    action: 'update_book',
+                    isbn,
+                    title,
+                    author_name,
+                    category,
+                    publisher,
+                    published_year,
+                    section_id, 
+                    genres,
+                    description 
+                    };
+                    
+                    // Only add the cover_picture key if a new one was uploaded
+                    if (cover_picture !== null) {
+                        updateData.cover_picture = cover_picture;
+                    }
+
+                    try {
+                        const response = await fetch('crud/EditOrDelete.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(updateData)
+                        });
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Now that the book is updated, call CopyCRUD to adjust the number of copies
+                const copiesResponse = await fetch(`crud/CopyCRUD.php?isbn=${isbn}&copies=${newCopies}`);
+                const copiesResult = await copiesResponse.json();
+                
+                if (copiesResult.success) {
+                    alert('Book and copies updated successfully!');
                 } else {
-                    alert('Image upload failed: ' + uploadResult.message);
-                    return; // Stop the process if the upload fails
+                    alert('Book updated, but failed to adjust copies: ' + copiesResult.message);
                 }
-            } catch (error) {
-                alert('An error occurred during image upload.');
-                console.error(error);
-                return; // Stop the process on error
-            }
-        }
-        
-        // Prepare the data to update the book, using the new URL or the existing one
-        const updateData = {
-        action: 'update_book',
-        isbn,
-        title,
-        author_name,
-        category,
-        publisher,
-        published_year,
-        section_id, // New
-        genres // New
-        };
-        
-        // Only add the cover_picture key if a new one was uploaded
-        if (cover_picture !== null) {
-            updateData.cover_picture = cover_picture;
-        }
-
-        try {
-            const response = await fetch('crud/EditOrDelete.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(updateData)
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                alert('Book updated successfully!');
+                
                 editModal.hide();
                 fetchBooks(); // Refresh the list
-            } else {
-                alert('Update failed: ' + result.message);
+                        } else {
+                            alert('Update failed: ' + result.message);
+                        }
+                    } catch (error) {
+                        console.error('Error updating book:', error);
+                        alert('An error occurred while updating the book.');
+                    }
+                });
             }
-        } catch (error) {
-            //console.error('Error updating book:', error);
-            alert('An error occurred while updating the book.');
-        }
-    });
-}
             
             // Event listener for the "Delete Book" button in the modal
             if (deleteBookBtn) {

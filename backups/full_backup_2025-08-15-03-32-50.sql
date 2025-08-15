@@ -1,0 +1,12 @@
+INSERT INTO `Library_Sections` (`SectionID`, `Name`) VALUES ('1', 'Section 02');
+INSERT INTO `Library_Sections` (`SectionID`, `Name`) VALUES ('6', 'Section 6');
+INSERT INTO `Library_Sections` (`SectionID`, `Name`) VALUES ('9', 'Section 9');
+INSERT INTO `Library_Sections` (`SectionID`, `Name`) VALUES ('10', 'Section 8');
+INSERT INTO `Library_Sections` (`SectionID`, `Name`) VALUES ('11', 'Section 20');
+INSERT INTO `Library_Sections` (`SectionID`, `Name`) VALUES ('12', 'Section 3');
+INSERT INTO `Library_Sections` (`SectionID`, `Name`) VALUES ('13', 'Section 5');
+INSERT INTO `Shelf` (`ShelfID`, `SectionID`, `Topic`) VALUES ('1', '6', 'I do not Know');
+INSERT INTO `Shelf` (`ShelfID`, `SectionID`, `Topic`) VALUES ('2', '1', 'Rifa');
+INSERT INTO `Shelf` (`ShelfID`, `SectionID`, `Topic`) VALUES ('3', '1', 'Rifa');
+INSERT INTO `Members` (`UserID`, `Name`, `Email`, `MembershipType`, `PhoneNumber`, `Address_Street`, `Address_City`, `Address_ZIP`) VALUES ('1', 'Admin User', 'admin@libginie.com', 'admin', NULL, NULL, NULL, NULL);
+INSERT INTO `Members` (`UserID`, `Name`, `Email`, `MembershipType`, `PhoneNumber`, `Address_Street`, `Address_City`, `Address_ZIP`) VALUES ('2', 'AhsanAalok', 'atuh@gm.vom', 'author', '01618191012', 'Mirpur DOHS', 'Dhaka', '1216');
