@@ -35,6 +35,7 @@ $published_years = getDistinctValues($con, 'Books', 'PublishedYear');
 $sql_authors = "SELECT DISTINCT m.Name FROM Members m JOIN Author a ON m.UserID = a.UserID ORDER BY m.Name";
 $result_authors = $con->query($sql_authors);
 $authors = [];
+$orderby = $_GET['orderby'] ?? 'newarrivals';
 if ($result_authors) {
     while ($row = $result_authors->fetch_assoc()) {
         $authors[] = htmlspecialchars($row['Name']);
@@ -322,6 +323,17 @@ $con->close();
                             </select>
                         </div>
                     </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="orderByFilter" class="form-label">Order By</label>
+                        <select id="orderByFilter" class="form-select">
+                            <option value="newarrivals">New Arrivals</option>
+                            <option value="trending">Trending</option>
+                            <option value="toprated">Top Rated</option>
+                            <option value="author_name">Author Name</option>
+                            <option value="book_title">Book Title</option>
+                        </select>
+                    </div>               
+
                 </div>
                 <div class="d-flex justify-content-end mt-3">
                     <button id="applyFiltersBtn" class="btn btn-primary me-2">Apply Filters</button>
@@ -417,8 +429,20 @@ $con->close();
                 filterOptions.slideToggle();
             });
 
-            // Initial load of all books
-            fetchBooks();
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search');
+            const orderbyParam = urlParams.get('orderby') || 'newarrivals';
+
+            $('#orderByFilter').val(orderbyParam);
+
+            // If there’s a search keyword in the URL, set it in the input and fetch filtered books
+            if (searchParam) {
+                $('#bookSearchInput').val(searchParam);
+                fetchBooks({ search: searchParam, orderby: orderbyParam });
+            } else {
+                fetchBooks({ orderby: orderbyParam });
+            }
 
             // Live search functionality with debounce
                 let typingTimer; // A timer to debounce the search
@@ -428,8 +452,10 @@ $con->close();
                     clearTimeout(typingTimer);
                     typingTimer = setTimeout(function() {
                         const searchTerm = bookSearchInput.val();
+                        const currentOrderby = $('#orderByFilter').val(); // Get current order by value
                         fetchBooks({
-                            search: searchTerm
+                            search: searchTerm,
+                            orderby: currentOrderby // Pass it here
                         });
                         updateFilterIconColor();
                     }, doneTypingInterval);
@@ -455,7 +481,8 @@ $con->close();
                     genres: genreFilter.val(),
                     years: yearFilter.val(),
                     publishers: publisherFilter.val(),
-                    authors: authorFilter.val()
+                    authors: authorFilter.val(),
+                    orderby: $('#orderByFilter').val() // Add this line
                 };
                 fetchBooks(filters);
                 updateFilterIconColor();

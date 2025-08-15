@@ -4,8 +4,8 @@
 
     <ul>
         <li><a href="dashboard.php">Dashboard</a></li>
-        <li><a href="#">My Books</a></li>
-        <li><a href="#">Borrow and Reserve Books</a></li>
+        <li><a href="MyBooks.php">My Books</a></li>
+        <li><a href="BorrowNReserve.php">Borrow and Reserve Books</a></li>
 
         <?php if ($user_role === 'admin') : ?>
         <li><a href="../backend/BookMng.php">Book Management</a></li>
@@ -14,12 +14,8 @@
         <li><a href="../backend/MemMng.php">Member Management</a></li>
         <li><a href="../backend/EmpMng.php">Employee Management</a></li>
         <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
-        <li><a href="#">Request Book</a></li>
+        <li><a href="ReqBook.php">Request Book</a></li>
         
-        <?php endif; ?>
-
-        <?php if ($user_role === 'author') : ?>
-        <li><a href="author_account.html">My Account</a></li>
         <?php endif; ?>
         
         <li class="collapsible-header" onclick="toggleSublist('categoryList')" aria-expanded="false" aria-controls="categoryList">
@@ -43,8 +39,6 @@
     <img src="../images/logo3.png" alt="Logo" class="logo" />
     <ul>
         <li><a href="signup.php">Sign Up</a></li>
-        <li><a href="#" class="disabled-link">Reserved</a></li>
-        <li><a href="#">Settings</a></li>
         <li><a href="login.php">Log In</a></li>
     </ul>
 </nav>
