@@ -24,7 +24,10 @@ if (!isset($_POST['isbn']) || !isset($_POST['action']) || !isset($_POST['status'
 $isbn = $_POST['isbn'];
 $user_id = $_SESSION['UserID'];
 $action = $_POST['action'];
-$status = filter_var($_POST['status'], FILTER_VALIDATE_BOOLEAN);
+
+// Manually convert the string to a boolean to avoid PHP's filter_var quirks
+// This is already correct from the previous fix.
+$status = ($_POST['status'] === 'true');
 
 // Determine the column to update based on the action
 $column_to_update = '';
@@ -44,11 +47,8 @@ switch ($action) {
 }
 
 // Prepare the SQL statement using ON DUPLICATE KEY UPDATE
-// This is an efficient way to handle both INSERT and UPDATE in a single query.
-// It inserts a new row if the combination of UserID and ISBN doesn't exist,
-// or updates the specified column if it does.
-$sql = "INSERT INTO BookInteractions (UserID, ISBN, {$column_to_update}) 
-        VALUES (?, ?, ?) 
+$sql = "INSERT INTO BookInteractions (UserID, ISBN, {$column_to_update})
+        VALUES (?, ?, ?)
         ON DUPLICATE KEY UPDATE {$column_to_update} = ?";
 
 $stmt = $con->prepare($sql);
@@ -59,8 +59,12 @@ if ($stmt === false) {
     exit;
 }
 
-// Bind the parameters to the statement
-$stmt->bind_param("isis", $user_id, $isbn, $status, $status);
+// --- The corrected part ---
+// Convert the boolean to an integer (0 or 1)
+$status_int = $status ? 1 : 0;
+
+// Bind the parameters: i (int) for user_id, s (string) for isbn, i (int) for status twice
+$stmt->bind_param("isii", $user_id, $isbn, $status_int, $status_int);
 
 // Execute the statement
 if ($stmt->execute()) {

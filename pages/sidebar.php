@@ -1,4 +1,3 @@
-
 <?php if (!$is_guest) : // Main sidebar for all logged-in users ?>
 <nav class="sidebar closed" id="sidebar">
     <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
