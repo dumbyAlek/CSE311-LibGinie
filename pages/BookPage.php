@@ -10,6 +10,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 // Include your database configuration and functions
 require_once '../backend/crud/db_config.php';
+require_once '../backend/crud/log_action.php';
 
 // Check if an ISBN is provided in the URL
 if (!isset($_GET['isbn']) || empty($_GET['isbn'])) {
@@ -41,24 +42,27 @@ function getAverageRating($con, $isbn) {
     return $row['avg_rating'] ?? 0;
 }
 
-/**
- * @param mysqli $con
- * @param string $isbn
- * @return array|null
- */
 function getBookDetails($con, $isbn) {
     $sql = "
     SELECT
         b.ISBN, b.Title, b.CoverPicture, b.PublishedYear, b.Publisher, b.Description, b.Category,
         m.Name AS AuthorName,
-        GROUP_CONCAT(g.GenreName SEPARATOR ', ') AS Genres
+        GROUP_CONCAT(g.GenreName SEPARATOR ', ') AS Genres,
+        t.Subject, t.Editions,
+        c.Artist, c.Studio,
+        n.Narration,
+        mag.Timeline
     FROM Books b
     LEFT JOIN Author a ON b.AuthorID = a.AuthorID
     LEFT JOIN Members m ON a.UserID = m.UserID
     LEFT JOIN Book_Genres bg ON b.ISBN = bg.ISBN
     LEFT JOIN Genres g ON bg.GenreID = g.GenreID
+    LEFT JOIN TextBook t ON b.ISBN = t.ISBN AND b.Category = 'Text Books'
+    LEFT JOIN Comics c ON b.ISBN = c.ISBN AND b.Category = 'Comics'
+    LEFT JOIN Novels n ON b.ISBN = n.ISBN AND b.Category = 'Novels'
+    LEFT JOIN Magazines mag ON b.ISBN = mag.ISBN AND b.Category = 'Magazines'
     WHERE b.ISBN = ?
-    GROUP BY b.ISBN";
+GROUP BY b.ISBN, t.Subject, t.Editions, c.Artist, c.Studio, n.Narration, mag.Timeline";
 
     $stmt = $con->prepare($sql);
     $stmt->bind_param("s", $isbn);
@@ -109,6 +113,9 @@ function getUserInteraction($con, $user_id, $isbn) {
     $result = $stmt->get_result();
     $interaction = $result->fetch_assoc();
     $stmt->close();
+    // Log the action: User updated account information
+    $_SESSION['user_name'] = $uname;
+    log_action($user_id, 'Book Interaction', 'User ' . $uname . ' interacted with a book.');
     return $interaction ? $interaction : ['IsFavorite' => false, 'InWishlist' => false, 'IsRead' => false];
 }
 
@@ -410,9 +417,21 @@ $con->close();
                         <div class="book-info">
                             <h1 class="mb-2"><?php echo htmlspecialchars($book['Title']); ?></h1>
                             <p><strong>Author:</strong> <?php echo htmlspecialchars($book['AuthorName'] ?? 'Unknown'); ?></p>
+                            <p><strong>ISBN:</strong> <?php echo htmlspecialchars($book['ISBN'] ?? 'Unknown'); ?></p>
                             <p><strong>Publisher:</strong> <?php echo htmlspecialchars($book['Publisher'] ?? 'Unknown'); ?></p>
                             <p><strong>Published Year:</strong> <?php echo htmlspecialchars($book['PublishedYear'] ?? 'N/A'); ?></p>
                             <p><strong>Genres:</strong> <?php echo htmlspecialchars($book['Genres'] ?? 'N/A'); ?></p>
+                            <?php if ($book['Category'] === 'Text Books' && ($book['Subject'] || $book['Editions'])): ?>
+                                <p><strong>Subject:</strong> <?php echo htmlspecialchars($book['Subject'] ?? 'N/A'); ?></p>
+                                <p><strong>Edition:</strong> <?php echo htmlspecialchars($book['Editions'] ?? 'N/A'); ?></p>
+                            <?php elseif ($book['Category'] === 'Comics' && ($book['Artist'] || $book['Studio'])): ?>
+                                <p><strong>Artist:</strong> <?php echo htmlspecialchars($book['Artist'] ?? 'N/A'); ?></p>
+                                <p><strong>Studio:</strong> <?php echo htmlspecialchars($book['Studio'] ?? 'N/A'); ?></p>
+                            <?php elseif ($book['Category'] === 'Novels' && $book['Narration']): ?>
+                                <p><strong>Narrative:</strong> <?php echo htmlspecialchars($book['Narration'] ?? 'N/A'); ?></p>
+                            <?php elseif ($book['Category'] === 'Magazines' && $book['Timeline']): ?>
+                                <p><strong>Timeline:</strong> <?php echo htmlspecialchars($book['Timeline'] ?? 'N/A'); ?></p>
+                            <?php endif; ?>
                             <div class="book-rating mb-3">
                                 <?php
                                 $rating = round($average_rating);

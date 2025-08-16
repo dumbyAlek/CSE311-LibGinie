@@ -6,6 +6,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 require_once '../backend/crud/db_config.php';
+require_once '../backend/crud/log_action.php';
 
 $user_id = $_SESSION['UserID'];
 $user_role = isset($_SESSION['membershipType']) ? $_SESSION['membershipType'] : 'guest';

@@ -1,6 +1,7 @@
 <?php
 // Include your database connection file
 require_once 'db_config.php';
+require_once 'log_action.php';
 
 header('Content-Type: application/json');
 
@@ -67,6 +68,7 @@ try {
     }
 
     $con->commit();
+    log_action($_SESSION['UserID'], 'Book Management', 'User ' . $_SESSION['user_name'] . ' Book Copies updated.');
     echo json_encode(['success' => true, 'message' => 'Book copies updated successfully.']);
 
 } catch (Exception $e) {

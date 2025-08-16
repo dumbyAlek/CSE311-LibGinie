@@ -16,6 +16,7 @@ if (!isset($_POST['isbn'], $_POST['rating'], $_POST['reviewText'])) {
 }
 
 require_once 'crud/db_config.php';
+require_once 'crud/log_action.php';
 
 if (!$con || $con->connect_error) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed.']);
@@ -56,6 +57,7 @@ if ($result_check->num_rows > 0) {
     }
     $stmt_update->bind_param("isss", $rating, $reviewText, $userId, $isbn);
     if ($stmt_update->execute()) {
+        log_action($_SESSION['UserID'], 'Book Interaction', 'User ' . $_SESSION['user_name'] . ' updated a book review.');
         echo json_encode(['success' => true, 'message' => 'Review updated successfully.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to update review: ' . $stmt_update->error]);
@@ -71,6 +73,7 @@ if ($result_check->num_rows > 0) {
     }
     $stmt_insert->bind_param("isss", $userId, $isbn, $rating, $reviewText);
     if ($stmt_insert->execute()) {
+        log_action($_SESSION['UserID'], 'Book Interaction', 'User ' . $_SESSION['user_name'] . ' submitede a book review.');
         echo json_encode(['success' => true, 'message' => 'Review submitted successfully.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to submit review: ' . $stmt_insert->error]);

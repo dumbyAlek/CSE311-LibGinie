@@ -73,7 +73,7 @@ $read_books = fetchUserBooks($con, $user_id, 'read');
 $wishlist_books = fetchUserBooks($con, $user_id, 'wishlist');
 
 // Recommended For You: Based on the genres of their favorite and read books
-$sql_genres = "SELECT DISTINCT bg.GenreID FROM BookInteractions bi JOIN Book_Genres bg ON bi.ISBN = bg.ISBN WHERE bi.UserID = ? AND (bi.IsFavorite = 1 OR bi.IsRead = 1)";
+$sql_genres = "SELECT DISTINCT bg.GenreID FROM BookInteractions bi JOIN Book_Genres bg ON bi.ISBN = bg.ISBN WHERE bi.UserID = ? AND (bi.IsFavorite = 1 OR bi.IsRead = 1 OR bi.InWishlist = 1)";
 $user_genres = getBooks($con, $sql_genres, [$user_id], "i");
 
 $recommendedBooks = [];
@@ -86,8 +86,11 @@ if (!empty($user_genres)) {
                         FROM Books b
                         JOIN Book_Genres bg ON b.ISBN = bg.ISBN
                         WHERE bg.GenreID IN ($in_clause) 
-                        AND b.ISBN NOT IN (SELECT ISBN FROM BookInteractions WHERE UserID = ?)
-                        ORDER BY RAND() LIMIT 10";
+                        AND b.ISBN NOT IN (SELECT ISBN 
+                                        FROM BookInteractions 
+                                        WHERE UserID = ? AND (IsFavorite = 1 OR IsRead = 1 OR InWishlist = 1)
+                                        )
+                        ORDER BY RAND() LIMIT 6";
     
     // Prepare the parameters for the SQL query
     $params = array_merge($genre_ids, [$user_id]);

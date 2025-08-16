@@ -10,6 +10,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION
 
 // Include your database configuration
 require_once '../backend/crud/db_config.php';
+require_once '../backend/crud/log_action.php';
 
 $user_role = $_SESSION['membershipType'];
 $is_librarian = ($user_role === 'librarian');
@@ -28,6 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_section'])) {
         $stmt->bind_param("s", $sectionName);
 
         if ($stmt->execute()) {
+            log_action($_SESSION['UserID'], 'Sections and Shelved', 'User ' . $_SESSION['user_name'] . ' added a new section.');
             $message = "Section '{$sectionName}' added successfully! ✅";
         } else {
             $error = "Error adding section: " . $stmt->error;
@@ -49,6 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_shelf'])) {
         $stmt->bind_param("is", $sectionID, $shelfTopic);
 
         if ($stmt->execute()) {
+            log_action($_SESSION['UserID'], 'Sections and Shelved', 'User ' . $_SESSION['user_name'] . ' added a new shelf.');
             $message = "Shelf '{$shelfTopic}' added to section ID '{$sectionID}' successfully! ✅";
         } else {
             $error = "Error adding shelf: " . $stmt->error;
@@ -70,6 +73,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit_section'])) {
         $stmt->bind_param("si", $sectionName, $sectionID);
 
         if ($stmt->execute()) {
+            log_action($_SESSION['UserID'], 'Sections and Shelved', 'User ' . $_SESSION['user_name'] . ' updated a section.');
             $message = "Section '{$sectionName}' (ID: {$sectionID}) updated successfully! ✅";
         } else {
             $error = "Error updating section: " . $stmt->error;
@@ -90,6 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_section'])) {
         $stmt->bind_param("i", $sectionID);
 
         if ($stmt->execute()) {
+            log_action($_SESSION['UserID'], 'Sections and Shelved', 'User ' . $_SESSION['user_name'] . ' deleted a section.');
             $message = "Section with ID '{$sectionID}' and its shelves deleted successfully! 🗑️";
         } else {
             $error = "Error deleting section: " . $stmt->error;
@@ -111,6 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['edit_shelf'])) {
         $stmt->bind_param("si", $shelfTopic, $shelfID);
 
         if ($stmt->execute()) {
+            log_action($_SESSION['UserID'], 'Sections and Shelved', 'User ' . $_SESSION['user_name'] . ' updated a shelf.');
             $message = "Shelf '{$shelfTopic}' (ID: {$shelfID}) updated successfully! ✅";
         } else {
             $error = "Error updating shelf: " . $stmt->error;
@@ -131,6 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_shelf'])) {
         $stmt->bind_param("i", $shelfID);
 
         if ($stmt->execute()) {
+            log_action($_SESSION['UserID'], 'Sections and Shelved', 'User ' . $_SESSION['user_name'] . ' deleted a shelf.');
             $message = "Shelf with ID '{$shelfID}' deleted successfully! 🗑️";
         } else {
             $error = "Error deleting shelf: " . $stmt->error;
@@ -378,68 +385,7 @@ $con->close();
 <body>
     <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    <?php if (!$is_guest) : // Main sidebar for all logged-in users ?>
-    <nav class="sidebar closed" id="sidebar">
-        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="dashboard.php">Dashboard</a></li>
-            <li><a href="#">My Books</a></li>
-            <li><a href="#">Favorites</a></li>
-
-            <?php if ($user_role === 'admin') : ?>
-            <li><a href="../backend/BookMng.php">Book Management</a></li>
-            <li><a href="../backend/BookMain.php">Book Maintenance</a></li>
-            <li><a href="SecsNShelves.php">Sections & Shelves</a></li>
-            <li><a href="../backend/MemMng.php">Member Management</a></li>
-            <li><a href="../backend/EmpMng.php">Employee Management</a></li>
-            <?php elseif ($is_librarian) : ?>
-            <li><a href="../backend/MemMng.php">Member Management</a></li>
-            <li><a href="#">Request Book</a></li>
-            <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
-            <li><a href="#">Request Book</a></li>
-            <li><a href="#">Borrowed Books</a></li>
-            <?php endif; ?>
-
-            <?php if ($user_role === 'author') : ?>
-            <li><a href="author_account.html">My Account</a></li>
-            <?php endif; ?>
-            
-            <li class="collapsible-header" onclick="toggleSublist('categoryList')" aria-expanded="false" aria-controls="categoryList">
-                <span class="arrow">v</span> Categories
-            </li>
-            <ul class="sublist" id="categoryList" hidden>
-                <li><a href="categories.php?category=Text Books">Text Books</a></li>
-                <li><a href="categories.php?category=Comics">Comics</a></li>
-                <li><a href="categories.php?category=Novels">Novels</a></li>
-                <li><a href="categories.php?category=Magazines">Magazines</a></li>
-            </ul>
-
-            <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
-                <span class="arrow">></span> Genres
-            </li>
-            <ul class="sublist" id="genreList" hidden>
-                <li><a href="#">Fantasy</a></li>
-                <li><a href="#">Horror</a></li>
-                <li><a href="#">Romance</a></li>
-                <li><a href="#">[Browse All Genres]</a></li>
-            </ul>
-            
-            <li><a href="#">Reserved</a></li>
-            <li><a href="settings.php">Settings</a></li>
-            <li><a href="../backend/logout.php">Logout</a></li>
-        </ul>
-    </nav>
-    <?php else: // Sidebar for Guest users only ?>
-    <nav class="sidebar closed" id="sidebar">
-        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="signup.php">Sign Up</a></li>
-            <li><a href="#" class="disabled-link">Reserved</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="../pages/loginn.php">Log In</a></li>
-        </ul>
-    </nav>
-    <?php endif; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div class="content-wrapper">
         <div class="container">
@@ -496,9 +442,12 @@ $con->close();
             </div>
 
             <hr>
-
+            
             <div class="section-list-container">
                 <h3 class="text-center section-header-title mb-4">Existing Sections and Shelves</h3>
+                        <div class="mb-4">
+                            <input type="text" id="searchBar" class="form-control" placeholder="Search for sections or shelves...">
+                        </div>
                 <?php if (empty($sections)): ?>
                     <div class="alert alert-info text-center">No sections have been created yet.</div>
                 <?php else: ?>
@@ -596,22 +545,65 @@ $con->close();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const sidebar = document.getElementById('sidebar');
+        const headerLogo = document.getElementById('headerLogo');
 
         function toggleSidebar() {
+            if (!sidebar) return; // guest/librarian fallback
             sidebar.classList.toggle('closed');
+            if (sidebar.classList.contains('closed')) {
+                if (headerLogo) headerLogo.classList.add('visible');
+            } else {
+                if (headerLogo) headerLogo.classList.remove('visible');
+            }
         }
 
-        function toggleSublist(id) {
-            const header = document.querySelector(`[aria-controls="${id}"]`);
-            const sublist = document.getElementById(id);
-            const arrow = header.querySelector('.arrow');
-
-            const isExpanded = header.getAttribute('aria-expanded') === 'true';
-            header.setAttribute('aria-expanded', !isExpanded);
-            arrow.textContent = isExpanded ? '>' : 'v';
-            sublist.hidden = isExpanded;
-            sublist.classList.toggle('show');
+        // Ensure header logo matches initial sidebar state
+        if (sidebar && sidebar.classList.contains('closed') && headerLogo) {
+            headerLogo.classList.add('visible');
         }
+
+        // ✅ Theme toggle guarded
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('change', () => {
+                document.body.classList.toggle('dark-theme');
+            });
+        }
+
+        // ✅ Notification task box guarded
+        function toggleTaskBox() {
+            const taskBox = document.getElementById('taskBox');
+            if (taskBox) taskBox.classList.toggle('collapsed');
+        }
+
+        // JavaScript for search functionality
+        document.getElementById('searchBar').addEventListener('keyup', function() {
+            const query = this.value.toLowerCase();
+            const listGroupItems = document.querySelectorAll('.list-group-item');
+
+            listGroupItems.forEach(item => {
+                const sectionName = item.querySelector('h5').textContent.toLowerCase();
+                const shelfItems = item.querySelectorAll('.shelf-item');
+                let foundInShelves = false;
+
+                shelfItems.forEach(shelf => {
+                    const shelfTopic = shelf.querySelector('span').textContent.toLowerCase();
+                    const matchesShelf = shelfTopic.includes(query);
+                    shelf.style.display = matchesShelf ? 'flex' : 'none';
+                    if (matchesShelf) {
+                        foundInShelves = true;
+                    }
+                });
+
+                const matchesSection = sectionName.includes(query);
+
+                if (matchesSection || foundInShelves) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
 
         // JavaScript for Edit Section Modal
         document.getElementById('editSectionModal').addEventListener('show.bs.modal', function (event) {

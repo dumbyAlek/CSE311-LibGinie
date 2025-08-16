@@ -7,6 +7,7 @@ header('Content-Type: application/json');
 
 // Include the database configuration
 require_once 'crud/db_config.php';
+require_once 'crud/log_action.php';
 
 // Check if the user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
@@ -68,6 +69,7 @@ $stmt->bind_param("isii", $user_id, $isbn, $status_int, $status_int);
 
 // Execute the statement
 if ($stmt->execute()) {
+    log_action($_SESSION['UserID'], 'Book Interaction', 'User ' . $_SESSION['user_name'] . ' interacted with a book.');
     echo json_encode(['success' => true]);
 } else {
     echo json_encode(['success' => false, 'message' => 'Failed to update book status: ' . $stmt->error]);

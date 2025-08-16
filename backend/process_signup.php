@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'crud/db_config.php';
+require_once '../backend/crud/log_action.php';
 
 // Check if the form was submitted from signup2.php
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -74,12 +75,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $updateMemberStmt->execute();
             $updateMemberStmt->close();
 
-            // Update LoginCredentials
-            $updateLoginSql = "UPDATE LoginCredentials SET Email = ?, PasswordHash = ? WHERE UserID = ?";
-            $updateLoginStmt = $con->prepare($updateLoginSql);
-            $updateLoginStmt->bind_param("ssi", $email, $hashedPassword, $userID);
-            $updateLoginStmt->execute();
-            $updateLoginStmt->close();
+            // Check if LoginCredentials exists for this UserID
+            $checkLoginSql = "SELECT Email FROM LoginCredentials WHERE UserID = ?";
+            $checkStmt = $con->prepare($checkLoginSql);
+            $checkStmt->bind_param("i", $userID);
+            $checkStmt->execute();
+            $checkResult = $checkStmt->get_result();
+            $loginRow = $checkResult->fetch_assoc();
+            $checkStmt->close();
+
+            if ($loginRow) {
+                // Case 3: Author already has login → update credentials
+                $updateLoginSql = "UPDATE LoginCredentials SET Email = ?, PasswordHash = ? WHERE UserID = ?";
+                $updateLoginStmt = $con->prepare($updateLoginSql);
+                $updateLoginStmt->bind_param("ssi", $email, $hashedPassword, $userID);
+                $updateLoginStmt->execute();
+                $updateLoginStmt->close();
+            } else {
+                // Case 2: Author exists but has no login → insert new login
+                $insertLoginSql = "INSERT INTO LoginCredentials (UserID, Email, PasswordHash) VALUES (?, ?, ?)";
+                $insertLoginStmt = $con->prepare($insertLoginSql);
+                $insertLoginStmt->bind_param("iss", $userID, $email, $hashedPassword);
+                $insertLoginStmt->execute();
+                $insertLoginStmt->close();
+            }
             
             // Update Author-specific details
             $updateAuthorSql = "UPDATE Author SET AuthorTitle = ?, AuthorBio = ? WHERE UserID = ?";
@@ -178,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $_SESSION['UserID'] = $userID;
         $_SESSION['user_name'] = $name;
         $_SESSION['membershipType'] = $membershipType;
-
+        log_action($_SESSION['UserID'], 'Login and SignUp', 'User ' . $_SESSION['user_name'] . ' signed up.');
         header('Location: ../pages/home.php');
         exit();
 

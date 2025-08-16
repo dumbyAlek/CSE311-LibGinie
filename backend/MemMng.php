@@ -7,8 +7,9 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 }
 
 require_once 'crud/db_config.php';
+require_once 'crud/log_action.php';
 
-$user_role = $_SESSION['membershipType'] ?? 'guest';
+$user_role = $_SESSION['membershipType'];
 $is_admin = ($user_role === 'admin');
 $is_librarian = ($user_role === 'librarian');
 
