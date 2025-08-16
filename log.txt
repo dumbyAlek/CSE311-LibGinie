@@ -9,3 +9,185 @@
 [2025-08-15 03:38:48] [UserID: 1] [Data Import]: Admin imported data from a SQL file.
 [2025-08-15 04:50:55] [UserID: 1] [Data Export]: Admin created a full database backup.
 [2025-08-15 19:13:38] [UserID: 1] [Account Update]: User Admin User updated their account information.
+[2025-08-16 11:47:01] [UserID: 1] [Account Update]: User Admin User updated their account information.
+[2025-08-16 11:55:34] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 11:55:54] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 11:59:58] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:00:08] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:00:10] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:01:19] [UserID: 1] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-16 12:01:25] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:02:07] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:10] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:11] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:12] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:14] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:16] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:18] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:02:21] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:04:12] [UserID: 1] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-16 12:05:28] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:05:50] [UserID: 1] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-16 12:08:52] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:09:00] [UserID: 1] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-16 12:09:04] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:09:25] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:09:26] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:09:28] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:09:31] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:11:35] [UserID: 1] [Borrow and Reserve]: User  cancelled a book reservation.
+[2025-08-16 12:11:40] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:11:42] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:11:46] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:12:28] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:12:29] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:12:32] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:12:35] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:12:49] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:12:57] [UserID: 1] [Borrow and Reserve]: User  reserved a book.
+[2025-08-16 12:15:45] [UserID: 1] [Borrow and Reserve]: User  reserved a book.
+[2025-08-16 12:15:46] [UserID: 1] [Borrow and Reserve]: User  reserved a book.
+[2025-08-16 12:15:49] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:15:58] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:17:22] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:18:13] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:20:58] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:21:00] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:23:37] [UserID: ] [Login and SignUp]: User  logged in.
+[2025-08-16 12:24:07] [UserID: ] [Login and SignUp]: User Array logged in.
+[2025-08-16 12:24:54] [UserID: ] [Login and SignUp]: User  logged in.
+[2025-08-16 12:26:15] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 12:28:31] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 12:29:20] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 12:30:07] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 12:30:23] [UserID: 5] [Book Request]: User  requested a book.
+[2025-08-16 12:30:30] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 12:36:23] [UserID: ] [Book Request]: User  book request declined.
+[2025-08-16 12:39:40] [UserID: 10] [Book Request]: User  book added from requests.
+[2025-08-16 13:36:54] [UserID: 10] [Book Interaction]: User  interacted with a book.
+[2025-08-16 13:37:02] [UserID: 10] [Book Interaction]: User  interacted with a book.
+[2025-08-16 13:37:20] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 13:37:35] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 13:41:42] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 13:41:43] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 13:48:21] [UserID: 1] [Book Maintenance]: User  added a book for maintanence.
+[2025-08-16 14:01:26] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:01:37] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:10:12] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:10:29] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:13:46] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:13:47] [UserID: 5] [Borrow and Reserve]: User  reserved a book.
+[2025-08-16 14:13:47] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:20:06] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:33:04] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:33:10] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:33:35] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:33:50] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:34:09] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:34:10] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:39:38] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:40:11] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:43:16] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:43:18] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:50:52] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:54:50] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:55:25] [UserID: 2] [Login and SignUp]: User AhsanAalok signed up.
+[2025-08-16 15:07:29] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 15:07:31] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 15:07:37] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 15:07:41] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 15:08:26] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 15:08:47] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 15:08:51] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 15:09:01] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 15:11:03] [UserID: 2] [Login and SignUp]: User AhsanAalok signed up.
+[2025-08-16 15:12:34] [UserID: 11] [Login and SignUp]: User Tisha signed up.
+[2025-08-16 15:21:38] [UserID: 2] [Login and SignUp]: User AhsanAalok signed up.
+[2025-08-16 16:07:00] [UserID: 2] [Login and SignUp]: User AhsanAalok signed up.
+[2025-08-16 16:07:23] [UserID: 2] [Login and SignUp]: User AhsanAalok logged in.
+[2025-08-16 16:07:36] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:03] [UserID: 7] [Login and SignUp]: User DIMBY signed up.
+[2025-08-16 16:08:39] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:42] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:45] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:55] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:56] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:09:01] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:09:14] [UserID: 7] [Book Interaction]: User  submitede a book review.
+[2025-08-16 16:09:15] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:09:24] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 16:09:26] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:09:31] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 16:10:37] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:12:49] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 16:14:38] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 16:16:46] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:16:47] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:16:53] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:16:57] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:16:58] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:17:15] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:18:31] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:08] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:09] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:11] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:12] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:12] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:13] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:14] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:14] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:15] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:15] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:16] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:16] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:17] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:18] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:18] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:19] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:19] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:19] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:20] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:20] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:21] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:21:31] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:21:32] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:23:39] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 17:00:23] [UserID: 5] [Account Update]: User  updated their account information.
+[2025-08-16 17:00:44] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:10:16] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 17:14:34] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-16 17:14:49] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-16 17:14:49] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-16 17:16:10] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-16 17:16:11] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-16 17:19:22] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-16 17:19:32] [UserID: 1] [Sections and Shelved]: User  deleted a section.
+[2025-08-16 17:19:46] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-16 17:20:17] [UserID: 1] [Employee Management]: User  added a new librarian.
+[2025-08-16 17:20:30] [UserID: 1] [Employee Management]: User  updated librarian tasks.
+[2025-08-16 17:20:53] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 17:21:21] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:25:33] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 17:30:34] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:38:12] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 17:38:25] [UserID: 11] [Book Interaction]: User  interacted with a book.
+[2025-08-16 17:49:58] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:50:17] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 17:56:44] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:56:53] [UserID: 1] [Employee Management]: User Admin User removed a librarian.
+[2025-08-16 17:56:54] [UserID: 1] [Employee Management]: User Admin User updated librarian tasks.
+[2025-08-16 17:57:12] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 18:06:43] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 18:07:15] [UserID: 1] [Employee Management]: User Admin User updated librarian tasks.
+[2025-08-16 18:07:26] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 18:14:30] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 19:11:51] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 19:16:31] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 19:16:50] [UserID: 2] [Login and SignUp]: User AhsanAalok logged in.
+[2025-08-16 19:18:12] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 19:18:50] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 19:20:02] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 19:20:08] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 19:20:40] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 19:20:44] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 19:26:12] [UserID: 1] [Data Export]: Admin created a full database backup.

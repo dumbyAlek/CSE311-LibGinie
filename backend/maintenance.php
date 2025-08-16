@@ -1,7 +1,8 @@
 <?php
 // maintenance.php
 session_start();
-require_once '../backend/crud/db_config.php';
+require_once 'crud/db_config.php';
+require_once 'crud/log_action.php';
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: ../pages/loginn.php");
@@ -27,6 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect_with('Invalid request method.', 'danger');
 }
 
+
+// =======Issue for maintenance ========
 if ($action === 'issue') {
     $copy_id = isset($_POST['copy_id']) ? intval($_POST['copy_id']) : 0;
     $issue   = trim($_POST['issue'] ?? '');
@@ -59,12 +62,15 @@ if ($action === 'issue') {
     $ok2 = $stmt3->execute();
 
     if ($ok1 && $ok2) {
+        log_action($_SESSION['UserID'], 'Book Maintenance', 'User ' . $_SESSION['user_name'] . ' added a book for maintanence.');
         redirect_with('Copy sent to maintenance.', 'success', '#tab-active');
     } else {
         redirect_with('Failed to issue maintenance.', 'danger');
     }
 }
 
+
+// ======= Resolve an Issue ========
 if ($action === 'resolve') {
     $log_id  = isset($_POST['log_id']) ? intval($_POST['log_id']) : 0;
     $copy_id = isset($_POST['copy_id']) ? intval($_POST['copy_id']) : 0;
@@ -84,6 +90,7 @@ if ($action === 'resolve') {
     $ok2 = $stmt2->execute();
 
     if ($ok1 && $ok2) {
+        log_action($_SESSION['UserID'], 'Book Maintenance', 'User ' . $_SESSION['user_name'] . ' resolved a book issue.');
         redirect_with('Maintenance resolved and copy is now Available.', 'success', '#tab-history');
     } else {
         redirect_with('Failed to resolve maintenance.', 'danger');

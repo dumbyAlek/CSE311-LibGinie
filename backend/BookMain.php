@@ -8,9 +8,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 require_once '../backend/crud/db_config.php';
 
 $user_id    = $_SESSION['UserID'];
-$user_role  = $_SESSION['membershipType'] ?? 'guest';
-$is_guest   = ($user_role === 'guest');
-$is_librarian = ($user_role === 'librarian');
+$user_role  = $_SESSION['membershipType'];
 
 if ($user_role !== 'admin') {
     exit("Access denied. Admins only.");

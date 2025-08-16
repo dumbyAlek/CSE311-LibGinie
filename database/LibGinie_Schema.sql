@@ -280,3 +280,13 @@ CREATE TABLE IF NOT EXISTS BookReviews (
     FOREIGN KEY (ISBN) REFERENCES Books(ISBN),
     FOREIGN KEY (UserID) REFERENCES Members(UserID)
 );
+
+-- 31. Keep track of Book Requests
+CREATE TABLE IF NOT EXISTS BookRequests (
+    ReqID INT PRIMARY KEY AUTO_INCREMENT,
+    BookName VARCHAR(200) NOT NULL,
+    Author VARCHAR(20),
+    Status VARCHAR(20),
+    UserID INT,
+    FOREIGN KEY (UserID) REFERENCES Members(UserID)
+);

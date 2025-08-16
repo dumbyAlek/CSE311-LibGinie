@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'crud/db_config.php';
+require_once 'crud/log_action.php';
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: ../pages/loginn.php");
@@ -33,6 +34,7 @@ if ($row = $res->fetch_assoc()) {
         $stmt2->bind_param("iis", $user_id, $copy_id, $due_date);
         $stmt2->execute();
         $con->commit();
+        log_action($_SESSION['UserID'], 'Borrow and Reserve', 'User ' . $_SESSION['user_name'] . ' borrowed a book.');
         $msg = "Book borrowed successfully! Due date: $due_date";
     } catch (Exception $e) {
         $con->rollback();

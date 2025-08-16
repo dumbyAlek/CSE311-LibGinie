@@ -30,7 +30,7 @@ $authorActivity = ['labels' => [], 'borrowData' => [], 'viewData' => []];
 
 try {
     // --- Personal Stats for ALL Members ---
-    $stmt = $con->prepare("SELECT COUNT(*) AS total_read FROM Borrow WHERE UserID = ? AND Return_Date IS NOT NULL");
+    $stmt = $con->prepare("SELECT COUNT(*) AS total_read FROM BookInteractions WHERE UserID = ? AND IsRead = TRUE");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -38,8 +38,8 @@ try {
         $booksReadCount = $row['total_read'];
     }
     $stmt->close();
-    
-    $stmt = $con->prepare("SELECT COUNT(*) AS total_favorites FROM Favorites WHERE UserID = ?");
+
+    $stmt = $con->prepare("SELECT COUNT(*) AS total_favorites FROM BookInteractions WHERE UserID = ? AND IsFavorite = TRUE");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -48,8 +48,7 @@ try {
     }
     $stmt->close();
 
-    // Fetch total books viewed by the current user
-    $stmt = $con->prepare("SELECT COUNT(*) AS total_views FROM BookViews WHERE UserID = ?");
+    $stmt = $con->prepare("SELECT COUNT(DISTINCT ISBN) AS total_views FROM BookInteractions WHERE UserID = ?");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -57,21 +56,22 @@ try {
         $booksViewedCount = $row['total_views'];
     }
     $stmt->close();
-    
-    // NEW: Fetch the last 3 books viewed by the user
+
+    // Fetch the last 3 books viewed by the user
     $stmt = $con->prepare("
-        SELECT k.Title, k.ISBN, k.AuthorID, a.Name AS AuthorName
-        FROM BookViews AS bv
-        JOIN Books AS k ON bv.ISBN = k.ISBN
-        JOIN Author AS a ON k.AuthorID = a.AuthorID
-        WHERE bv.UserID = ?
-        GROUP BY k.ISBN
-        ORDER BY bv.ViewDate DESC
+        SELECT b.Title, b.ISBN, b.CoverPicture, m.Name AS AuthorName
+        FROM BookInteractions AS bi
+        JOIN Books AS b ON bi.ISBN = b.ISBN
+        JOIN Author AS a ON b.AuthorID = a.AuthorID
+        JOIN Members AS m ON a.UserID = m.UserID
+        WHERE bi.UserID = ?
+        ORDER BY bi.LastViewed DESC
         LIMIT 3
     ");
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
+    $lastViewedBooks = [];
     while ($row = $result->fetch_assoc()) {
         $lastViewedBooks[] = $row;
     }
@@ -105,7 +105,7 @@ try {
         }
         $stmt->close();
         
-        $stmt = $con->prepare("SELECT DATE_FORMAT(ViewDate, '%Y-%m') as month, COUNT(*) as view_count FROM BookViews WHERE UserID = ? AND ViewDate >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) GROUP BY month ORDER BY month");
+        $stmt = $con->prepare("SELECT DATE_FORMAT(LastViewed, '%Y-%m') as month, COUNT(DISTINCT ISBN) as view_count FROM BookInteractions WHERE UserID = ? AND LastViewed >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) GROUP BY month ORDER BY month");
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $viewResult = $stmt->get_result();
@@ -122,48 +122,68 @@ try {
         }
 
     } elseif ($user_role === 'admin') {
-        $stmt = $con->prepare("SELECT DATE_FORMAT(DateAdded, '%Y-%m') as month, COUNT(*) as count FROM Books WHERE DateAdded >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) GROUP BY month ORDER BY month");
-        $stmt->execute();
-        $booksAddedResult = $stmt->get_result();
-        
-        $stmt = $con->prepare("SELECT DATE_FORMAT(ResolvedDate, '%Y-%m') as month, COUNT(*) as count FROM MaintenanceLog WHERE IsResolved = TRUE AND ResolvedDate >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) GROUP BY month ORDER BY month");
-        $stmt->execute();
-        $maintenanceFixedResult = $stmt->get_result();
-        
-        $monthData = [];
-        for ($i = 5; $i >= 0; $i--) {
-            $date = (new DateTime())->sub(new DateInterval("P{$i}M"));
-            $month = $date->format('Y-m');
-            $monthData[$month] = ['booksAdded' => 0, 'maintenanceFixed' => 0];
-        }
-        
-        while ($row = $booksAddedResult->fetch_assoc()) {
-            $monthData[$row['month']]['booksAdded'] = $row['count'];
-        }
-        while ($row = $maintenanceFixedResult->fetch_assoc()) {
-            $monthData[$row['month']]['maintenanceFixed'] = $row['count'];
-        }
-        
-        foreach ($monthData as $month => $counts) {
-            $adminActivity['labels'][] = date('M Y', strtotime($month));
-            $adminActivity['booksAdded'][] = $counts['booksAdded'];
-            $adminActivity['maintenanceFixed'][] = $counts['maintenanceFixed'];
-        }
-        $stmt->close();
+            $stmt = $con->prepare("SELECT DATE_FORMAT(AddDate, '%Y-%m') as month, COUNT(*) as count FROM BooksAdded WHERE UserID = ? AND AddDate >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) GROUP BY month ORDER BY month");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $booksAddedResult = $stmt->get_result();
+
+            // Updated to use DateReported (since ResolvedDate doesn't exist in schema)
+            $stmt = $con->prepare("SELECT DATE_FORMAT(DateReported, '%Y-%m') as month, COUNT(*) as count FROM MaintenanceLog WHERE IsResolved = TRUE AND UserID = ? AND DateReported >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH) GROUP BY month ORDER BY month");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $maintenanceFixedResult = $stmt->get_result();
+
+            $monthData = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $date = (new DateTime())->sub(new DateInterval("P{$i}M"));
+                $month = $date->format('Y-m');
+                $monthData[$month] = ['booksAdded' => 0, 'maintenanceFixed' => 0];
+            }
+
+            while ($row = $booksAddedResult->fetch_assoc()) {
+                if (isset($monthData[$row['month']])) {
+                    $monthData[$row['month']]['booksAdded'] = (int)$row['count'];
+                }
+            }
+            while ($row = $maintenanceFixedResult->fetch_assoc()) {
+                if (isset($monthData[$row['month']])) {
+                    $monthData[$row['month']]['maintenanceFixed'] = (int)$row['count'];
+                }
+            }
+
+            foreach ($monthData as $month => $counts) {
+                $adminActivity['labels'][] = date('M Y', strtotime($month));
+                $adminActivity['booksAdded'][] = $counts['booksAdded'];
+                $adminActivity['maintenanceFixed'][] = $counts['maintenanceFixed'];
+            }
+            $stmt->close();
     }
     
     // Additional author-specific graph data
     if ($user_role === 'author') {
-        $stmt = $con->prepare("SELECT k.Title, COUNT(b.BorrowID) AS TotalBorrows, COUNT(v.ViewID) AS TotalViews FROM Books AS k JOIN Author AS a ON k.AuthorID = a.AuthorID LEFT JOIN BookCopy AS c ON k.ISBN = c.ISBN LEFT JOIN Borrow AS b ON c.CopyID = b.CopyID LEFT JOIN BookViews AS v ON k.ISBN = v.ISBN WHERE a.UserID = ? GROUP BY k.ISBN ORDER BY TotalBorrows DESC LIMIT 5");
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $publishedResult = $stmt->get_result();
-        
-        while ($row = $publishedResult->fetch_assoc()) {
-            $authorActivity['labels'][] = htmlspecialchars($row['Title']);
-            $authorActivity['borrowData'][] = $row['TotalBorrows'];
-            $authorActivity['viewData'][] = $row['TotalViews'];
-        }
+            $stmt = $con->prepare("
+                SELECT b.ISBN, b.Title, b.CoverPicture, COUNT(bor.BorrowID) AS TotalBorrows, COUNT(bi.InteractionID) AS TotalViews 
+                FROM Books AS b 
+                JOIN Author AS a ON b.AuthorID = a.AuthorID 
+                LEFT JOIN BookCopy AS bc ON b.ISBN = bc.ISBN 
+                LEFT JOIN Borrow AS bor ON bc.CopyID = bor.CopyID 
+                LEFT JOIN BookInteractions AS bi ON b.ISBN = bi.ISBN 
+                WHERE a.UserID = ? 
+                GROUP BY b.ISBN 
+                ORDER BY TotalBorrows DESC 
+                LIMIT 5
+            ");
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $publishedResult = $stmt->get_result();
+
+            $authorActivity = ['labels' => [], 'borrowData' => [], 'viewData' => []];
+            while ($row = $publishedResult->fetch_assoc()) {
+                $authorActivity['labels'][] = htmlspecialchars($row['Title']);
+                $authorActivity['borrowData'][] = $row['TotalBorrows'];
+                $authorActivity['viewData'][] = $row['TotalViews'];
+            }
+            $stmt->close();
     }
 
 } catch (Exception $e) {
@@ -418,6 +438,94 @@ try {
             max-width: 400px; /* Limits the chart's max width */
             margin: 0 auto; /* Centers the chart */
         }
+
+        .book-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .book-link-item {
+            text-decoration: none; /* Removes the underline */
+            color: inherit; /* Inherits text color from parent to avoid blue link color */
+            display: flex; /* Makes the link a flex container to use the layout properties */
+            align-items: center; /* Vertically aligns the content */
+        }
+
+        .book-item {
+            display: flex; /* This is no longer needed on the inner div but can be kept for clarity if you wish */
+            align-items: center; /* Same as above */
+            gap: 15px;
+            width: 100%; /* Ensures the link fills the width */
+        }
+
+        .book-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-cover {
+            width: 60px;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .book-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-title {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .book-author {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .book-list-item {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Adds space between the image and the text */
+            padding: 10px 0;
+        }
+
+        .book-link {
+            text-decoration: none;
+            color: inherit; /* Prevents the text from turning blue */
+            display: flex; /* Makes the link a flex container */
+            align-items: center;
+            gap: 15px;
+        }
+
+        .book-link:hover {
+            transform: translateY(-5px);
+        }
+
+        .book-cover-thumb {
+            width: 50px; /* Adjust the width as needed */
+            height: auto;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .book-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .book-title-bold {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .book-stats {
+            font-size: 0.9em;
+            color: #666;
+        }
+
     </style>
 </head>
 
@@ -425,67 +533,7 @@ try {
 
     <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    <?php if (!$is_guest) : ?>
-    <nav class="sidebar closed" id="sidebar">
-        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="dashboard.php">Dashboard</a></li>
-            <li><a href="#">My Books</a></li>
-            <li><a href="#">Favorites</a></li>
-
-            <?php if ($user_role === 'admin') : ?>
-            <li><a href="../backend/BookMng.php">Book Management</a></li>
-            <li><a href="../backend/BookMain.php">Book Maintenance</a></li>
-            <li><a href="SecsNShelves.php">Sections & Shelves</a></li>
-            <li><a href="../backend/MemMng.php">Member Management</a></li>
-            <li><a href="../backend/EmpMng.php">Employee Management</a></li>
-            <?php elseif ($is_librarian) : ?>
-            <li><a href="#">Request Book</a></li>
-            <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
-            <li><a href="#">Request Book</a></li>
-            <li><a href="#">Borrowed Books</a></li>
-            <?php endif; ?>
-
-            <?php if ($user_role === 'author') : ?>
-            <li><a href="author_account.html">My Account</a></li>
-            <?php endif; ?>
-            
-            <li class="collapsible-header" onclick="toggleSublist('categoryList')" aria-expanded="false" aria-controls="categoryList">
-                <span class="arrow">></span> Categories
-            </li>
-            <ul class="sublist" id="categoryList" hidden>
-                <li><a href="categories.php?category=Text Books">Text Books</a></li>
-                <li><a href="categories.php?category=Comics">Comics</a></li>
-                <li><a href="categories.php?category=Novels">Novels</a></li>
-                <li><a href="categories.php?category=Magazines">Magazines</a></li>
-            </ul>
-
-            <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
-                <span class="arrow">></span> Genres
-            </li>
-            <ul class="sublist" id="genreList" hidden>
-                <li><a href="#">Fantasy</a></li>
-                <li><a href="#">Horror</a></li>
-                <li><a href="#">Romance</a></li>
-                <li><a href="#">[Browse All Genres]</a></li>
-            </ul>
-            
-            <li><a href="#">Reserved</a></li>
-            <li><a href="settings.php">Settings</a></li>
-            <li><a href="../backend/logout.php">Logout</a></li>
-        </ul>
-    </nav>
-    <?php else: ?>
-    <nav class="sidebar closed" id="sidebar">
-        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="signup.php">Sign Up</a></li>
-            <li><a href="#" class="disabled-link">Reserved</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="../backend/logout.php">Log In</a></li>
-        </ul>
-    </nav>
-    <?php endif; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div class="content-wrapper">
         <main class="container mt-4">
@@ -493,21 +541,21 @@ try {
 
             <?php switch ($user_role):
                 case 'admin':
-                    $totalMembers = $con->query("SELECT COUNT(*) FROM Members")->fetch_row()[0];
-                    $totalBooks = $con->query("SELECT COUNT(*) FROM Books")->fetch_row()[0];
-                    $overdueBooks = $con->query("SELECT COUNT(*) FROM Borrow WHERE Due_Date < CURDATE() AND Return_Date IS NULL")->fetch_row()[0];
+                        $totalMembers = $con->query("SELECT COUNT(*) FROM Members")->fetch_row()[0];
+                        $totalBooks = $con->query("SELECT COUNT(*) FROM Books")->fetch_row()[0];
+                        $overdueBooks = $con->query("SELECT COUNT(*) FROM Borrow WHERE Due_Date < CURDATE() AND Return_Date IS NULL")->fetch_row()[0];
 
-                    $newMembersStmt = $con->prepare("SELECT m.Name, r.RegistrationDate FROM Members AS m JOIN Registered AS r ON m.UserID = r.UserID ORDER BY r.RegistrationDate DESC LIMIT 5");
-                    $newMembersStmt->execute();
-                    $newMembersResult = $newMembersStmt->get_result();
+                        $newMembersStmt = $con->prepare("SELECT m.Name, r.RegistrationDate FROM Members AS m JOIN Registered AS r ON m.UserID = r.UserID ORDER BY r.RegistrationDate DESC LIMIT 5");
+                        $newMembersStmt->execute();
+                        $newMembersResult = $newMembersStmt->get_result();
 
-                    $newBooksStmt = $con->prepare("SELECT Title FROM Books ORDER BY ISBN DESC LIMIT 5");
-                    $newBooksStmt->execute();
-                    $newBooksResult = $newBooksStmt->get_result();
-                    
-                    $maintenanceIssuesStmt = $con->prepare("SELECT IssueDescription, DateReported FROM MaintenanceLog WHERE IsResolved = FALSE ORDER BY DateReported DESC LIMIT 5");
-                    $maintenanceIssuesStmt->execute();
-                    $maintenanceIssuesResult = $maintenanceIssuesStmt->get_result();
+                        $newBooksStmt = $con->prepare("SELECT b.Title FROM BooksAdded AS ba JOIN Books AS b ON ba.ISBN = b.ISBN ORDER BY ba.AddDate DESC LIMIT 5");
+                        $newBooksStmt->execute();
+                        $newBooksResult = $newBooksStmt->get_result();
+
+                        $maintenanceIssuesStmt = $con->prepare("SELECT IssueDescription, DateReported FROM MaintenanceLog WHERE IsResolved = FALSE ORDER BY DateReported DESC LIMIT 5");
+                        $maintenanceIssuesStmt->execute();
+                        $maintenanceIssuesResult = $maintenanceIssuesStmt->get_result();
                     ?>
                     <div class="dashboard-welcome">
                         <h1>Welcome, Admin!</h1>
@@ -518,25 +566,25 @@ try {
                     <div class="row">
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-book-reader"></i> Books Read</h4>
+                                <h4><i class="fas fa-book-reader"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > Books Read </a></h4>
                                 <p class="h2"><?php echo $booksReadCount; ?></p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-eye"></i> Books Viewed</h4>
+                                <h4><i class="fas fa-eye"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > Books Viewed </a></h4>
                                 <p class="h2"><?php echo $booksViewedCount; ?></p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-heart"></i> My Favorites</h4>
+                                <h4><i class="fas fa-heart"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > My Favorites</a></h4>
                                 <p class="h2"><?php echo $favoritesCount; ?></p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-chart-bar"></i> System Activity (Last 6 Months)</h4>
+                                <h4><i class="fas fa-chart-bar"></i> System Activity</h4>
                                 <div class="chart-container">
                                     <canvas id="adminActivityChart"></canvas>
                                 </div>
@@ -548,7 +596,7 @@ try {
                     <div class="row">
                         <div class="col-md-4">
                             <div class="info-card">
-                                <h4><i class="fas fa-user-plus"></i> New Members</h4>
+                                <h4><i class="fas fa-user-plus"></i> <a href="../backend/MemMng.php" style="text-decoration: none; color: #7b3fbf;" > New Members </a></h4>
                                 <ul>
                                     <?php while ($row = $newMembersResult->fetch_assoc()): ?>
                                         <li>**<?php echo htmlspecialchars($row['Name']); ?>** - Joined: <?php echo htmlspecialchars($row['RegistrationDate']); ?></li>
@@ -559,7 +607,7 @@ try {
                         </div>
                         <div class="col-md-4">
                             <div class="info-card">
-                                <h4><i class="fas fa-plus-circle"></i> New Books</h4>
+                                <h4><i class="fas fa-plus-circle"></i> <a href="AllBooks.php?orderby=newarrival" style="text-decoration: none; color: #7b3fbf;" > New Books </a></h4>
                                 <ul>
                                     <?php while ($row = $newBooksResult->fetch_assoc()): ?>
                                         <li>**<?php echo htmlspecialchars($row['Title']); ?>**</li>
@@ -570,7 +618,7 @@ try {
                         </div>
                         <div class="col-md-4">
                             <div class="info-card">
-                                <h4><i class="fas fa-tools"></i> Maintenance Issues</h4>
+                                <h4><i class="fas fa-tools"></i> <a href="../backend/BookMain.php" style="text-decoration: none; color: #7b3fbf;" > Maintenance Issues </a></h4>
                                 <ul>
                                     <?php while ($row = $maintenanceIssuesResult->fetch_assoc()): ?>
                                         <li>**<?php echo htmlspecialchars($row['IssueDescription']); ?>** - Reported: <?php echo htmlspecialchars($row['DateReported']); ?></li>
@@ -583,14 +631,30 @@ try {
                     <?php break;
 
                 case 'librarian':
-                    $overdueBooksStmt = $con->prepare("SELECT m.Name AS MemberName, k.Title, b.Due_Date FROM Borrow AS b JOIN BookCopy AS c ON b.CopyID = c.CopyID JOIN Books AS k ON c.ISBN = k.ISBN JOIN Members AS m ON b.UserID = m.UserID WHERE b.Due_Date < CURDATE() AND b.Return_Date IS NULL LIMIT 5");
-                    $overdueBooksStmt->execute();
-                    $overdueResult = $overdueBooksStmt->get_result();
+                        $overdueBooksStmt = $con->prepare("
+                            SELECT m.Name AS MemberName, k.Title, b.Due_Date 
+                            FROM Borrow AS b 
+                            JOIN BookCopy AS c ON b.CopyID = c.CopyID 
+                            JOIN Books AS k ON c.ISBN = k.ISBN 
+                            JOIN Members AS m ON b.UserID = m.UserID 
+                            WHERE b.Due_Date < CURDATE() AND b.Return_Date IS NULL 
+                            LIMIT 5
+                        ");
+                        $overdueBooksStmt->execute();
+                        $overdueResult = $overdueBooksStmt->get_result();
 
-                    $reservedBooksStmt = $con->prepare("SELECT k.Title FROM Reservation AS r JOIN BookCopy AS c ON r.CopyID = c.CopyID JOIN Books AS k ON c.ISBN = k.ISBN WHERE r.UserID = ? LIMIT 5");
-                    $reservedBooksStmt->bind_param("i", $user_id);
-                    $reservedBooksStmt->execute();
-                    $reservedResult = $reservedBooksStmt->get_result();
+                        $reservedBooksStmt = $con->prepare("
+                            SELECT k.Title, m.Name AS MemberName 
+                            FROM Reservation AS r 
+                            JOIN BookCopy AS c ON r.CopyID = c.CopyID 
+                            JOIN Books AS k ON c.ISBN = k.ISBN 
+                            JOIN Members AS m ON r.UserID = m.UserID 
+                            WHERE r.UserID = ? 
+                            LIMIT 5
+                        ");
+                        $reservedBooksStmt->bind_param("i", $user_id);
+                        $reservedBooksStmt->execute();
+                        $reservedResult = $reservedBooksStmt->get_result();
                     ?>
                     <div class="dashboard-welcome">
                         <h1>Welcome, Librarian!</h1>
@@ -601,19 +665,19 @@ try {
                     <div class="row">
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-book-reader"></i> Books Read</h4>
+                                <h4><i class="fas fa-book-reader"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > Books Read </a></h4>
                                 <p class="h2"><?php echo $booksReadCount; ?></p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-eye"></i> Books Viewed</h4>
+                                <h4><i class="fas fa-eye"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > Books Viewed </a></h4>
                                 <p class="h2"><?php echo $booksViewedCount; ?></p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-heart"></i> My Favorites</h4>
+                                <h4><i class="fas fa-heart"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > My Favorites </a></h4>
                                 <p class="h2"><?php echo $favoritesCount; ?></p>
                             </div>
                         </div>
@@ -630,17 +694,23 @@ try {
                         <div class="col-md-6">
                             <div class="info-card">
                                 <h4><i class="fas fa-history"></i> Last Viewed Books</h4>
-                                <ul>
+                                <div class="book-list-container">
                                     <?php if (!empty($lastViewedBooks)): ?>
                                         <?php foreach ($lastViewedBooks as $book): ?>
-                                            <li>
-                                                **<?php echo htmlspecialchars($book['Title']); ?>** by <?php echo htmlspecialchars($book['AuthorName']); ?>
-                                            </li>
+                                            <a href="BookPage.php?isbn=<?php echo htmlspecialchars($book['ISBN']); ?>" class="book-link-item">
+                                                <div class="book-item">
+                                                    <img src="<?php echo htmlspecialchars($book['CoverPicture']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?> Cover" class="book-cover">
+                                                    <div class="book-details">
+                                                        <span class="book-title"><?php echo htmlspecialchars($book['Title']); ?></span>
+                                                        <span class="book-author">by <?php echo htmlspecialchars($book['AuthorName']); ?></span>
+                                                    </div>
+                                                </div>
+                                            </a>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <li>No books viewed yet.</li>
+                                        <p>No books viewed yet.</p>
                                     <?php endif; ?>
-                                </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -673,10 +743,21 @@ try {
                 <?php break;
 
                 case 'author':
-                    $publishedBooksStmt = $con->prepare("SELECT k.Title, COUNT(b.BorrowID) AS TotalBorrows, COUNT(v.ViewID) AS TotalViews FROM Books AS k JOIN Author AS a ON k.AuthorID = a.AuthorID LEFT JOIN BookCopy AS c ON k.ISBN = c.ISBN LEFT JOIN Borrow AS b ON c.CopyID = b.CopyID LEFT JOIN BookViews AS v ON k.ISBN = v.ISBN WHERE a.UserID = ? GROUP BY k.ISBN ORDER BY TotalBorrows DESC LIMIT 5");
-                    $publishedBooksStmt->bind_param("i", $user_id);
-                    $publishedBooksStmt->execute();
-                    $publishedResult = $publishedBooksStmt->get_result();
+                        $publishedBooksStmt = $con->prepare("
+                            SELECT b.ISBN, b.Title, b.CoverPicture, COUNT(bor.BorrowID) AS TotalBorrows, COUNT(bi.InteractionID) AS TotalViews 
+                            FROM Books AS b 
+                            JOIN Author AS a ON b.AuthorID = a.AuthorID 
+                            LEFT JOIN BookCopy AS bc ON b.ISBN = bc.ISBN 
+                            LEFT JOIN Borrow AS bor ON bc.CopyID = bor.CopyID 
+                            LEFT JOIN BookInteractions AS bi ON b.ISBN = bi.ISBN 
+                            WHERE a.UserID = ? 
+                            GROUP BY b.ISBN 
+                            ORDER BY TotalBorrows DESC 
+                            LIMIT 5
+                        ");
+                        $publishedBooksStmt->bind_param("i", $user_id);
+                        $publishedBooksStmt->execute();
+                        $publishedResult = $publishedBooksStmt->get_result();
                     ?>
                     <div class="dashboard-welcome">
                         <h1>Welcome, <?php echo htmlspecialchars($user_name); ?>!</h1>
@@ -687,19 +768,19 @@ try {
                     <div class="row">
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-book-reader"></i> Books Read</h4>
+                                <h4><i class="fas fa-book-reader"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > Books Read </a></h4>
                                 <p class="h2"><?php echo $booksReadCount; ?></p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-eye"></i> Books Viewed</h4>
+                                <h4><i class="fas fa-eye"></i><a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > Books Viewed </a></h4>
                                 <p class="h2"><?php echo $booksViewedCount; ?></p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-heart"></i> My Favorites</h4>
+                                <h4><i class="fas fa-heart"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > My Favorites</a></h4>
                                 <p class="h2"><?php echo $favoritesCount; ?></p>
                             </div>
                         </div>
@@ -716,17 +797,23 @@ try {
                         <div class="col-md-6">
                             <div class="info-card">
                                 <h4><i class="fas fa-history"></i> Last Viewed Books</h4>
-                                <ul>
+                                <div class="book-list-container">
                                     <?php if (!empty($lastViewedBooks)): ?>
                                         <?php foreach ($lastViewedBooks as $book): ?>
-                                            <li>
-                                                **<?php echo htmlspecialchars($book['Title']); ?>** by <?php echo htmlspecialchars($book['AuthorName']); ?>
-                                            </li>
+                                            <a href="BookPage.php?isbn=<?php echo htmlspecialchars($book['ISBN']); ?>" class="book-link-item">
+                                                <div class="book-item">
+                                                    <img src="<?php echo htmlspecialchars($book['CoverPicture']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?> Cover" class="book-cover">
+                                                    <div class="book-details">
+                                                        <span class="book-title"><?php echo htmlspecialchars($book['Title']); ?></span>
+                                                        <span class="book-author">by <?php echo htmlspecialchars($book['AuthorName']); ?></span>
+                                                    </div>
+                                                </div>
+                                            </a>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <li>No books viewed yet.</li>
+                                        <p>No books viewed yet.</p>
                                     <?php endif; ?>
-                                </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -738,7 +825,14 @@ try {
                                 <h4><i class="fas fa-book-open"></i> Your Published Books</h4>
                                 <ul>
                                     <?php while ($row = $publishedResult->fetch_assoc()): ?>
-                                        <li>**<?php echo htmlspecialchars($row['Title']); ?>** (Total Borrows: <?php echo htmlspecialchars($row['TotalBorrows']); ?>)</li>
+                                        <li class="book-list-item">
+                                            <a href="BookPage.php?isbn=<?php echo htmlspecialchars($row['ISBN']); ?>" class="book-link">
+                                                <img src="<?php echo htmlspecialchars($row['CoverPicture']); ?>" alt="<?php echo htmlspecialchars($row['Title']); ?> Cover" class="book-cover-thumb">
+                                                <div class="book-details">
+                                                    <span class="book-title-bold"><?php echo htmlspecialchars($row['Title']); ?></span>
+                                                </div>
+                                            </a>
+                                        </li>
                                     <?php endwhile; ?>
                                     <?php if ($publishedResult->num_rows === 0) echo '<li>No books published yet.</li>'; ?>
                                 </ul>
@@ -758,15 +852,30 @@ try {
                 case 'student':
                 case 'teacher':
                 case 'general':
-                    $borrowedBooksStmt = $con->prepare("SELECT k.Title, b.Due_Date FROM Borrow AS b JOIN BookCopy AS c ON b.CopyID = c.CopyID JOIN Books AS k ON c.ISBN = k.ISBN WHERE b.UserID = ? AND b.Return_Date IS NULL LIMIT 5");
-                    $borrowedBooksStmt->bind_param("i", $user_id);
-                    $borrowedBooksStmt->execute();
-                    $borrowedResult = $borrowedBooksStmt->get_result();
-                    
-                    $reservedBooksStmt = $con->prepare("SELECT k.Title FROM Reservation AS r JOIN BookCopy AS c ON r.CopyID = c.CopyID JOIN Books AS k ON c.ISBN = k.ISBN WHERE r.UserID = ? LIMIT 5");
-                    $reservedBooksStmt->bind_param("i", $user_id);
-                    $reservedBooksStmt->execute();
-                    $reservedResult = $reservedBooksStmt->get_result();
+                        $borrowedBooksStmt = $con->prepare("
+                            SELECT k.Title, b.Due_Date 
+                            FROM Borrow AS b 
+                            JOIN BookCopy AS c ON b.CopyID = c.CopyID 
+                            JOIN Books AS k ON c.ISBN = k.ISBN 
+                            WHERE b.UserID = ? AND b.Return_Date IS NULL 
+                            LIMIT 5
+                        ");
+                        $borrowedBooksStmt->bind_param("i", $user_id);
+                        $borrowedBooksStmt->execute();
+                        $borrowedResult = $borrowedBooksStmt->get_result();
+
+                        $reservedBooksStmt = $con->prepare("
+                            SELECT k.Title, m.Name AS MemberName 
+                            FROM Reservation AS r 
+                            JOIN BookCopy AS c ON r.CopyID = c.CopyID 
+                            JOIN Books AS k ON c.ISBN = k.ISBN 
+                            JOIN Members AS m ON r.UserID = m.UserID 
+                            WHERE r.UserID = ? 
+                            LIMIT 5
+                        ");
+                        $reservedBooksStmt->bind_param("i", $user_id);
+                        $reservedBooksStmt->execute();
+                        $reservedResult = $reservedBooksStmt->get_result();
                     ?>
                     <div class="dashboard-welcome">
                         <h1>Welcome, <?php echo htmlspecialchars($user_name); ?>!</h1>
@@ -777,19 +886,19 @@ try {
                     <div class="row">
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-book-reader"></i> Books Read</h4>
+                                <h4><i class="fas fa-book-reader"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > Books Read </a></h4>
                                 <p class="h2"><?php echo $booksReadCount; ?></p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-eye"></i> Books Viewed</h4>
+                                <h4><i class="fas fa-eye"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > Books Viewed </a></h4>
                                 <p class="h2"><?php echo $booksViewedCount; ?></p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="info-card">
-                                <h4><i class="fas fa-heart"></i> My Favorites</h4>
+                                <h4><i class="fas fa-heart"></i> <a href="MyBooks.php" style="text-decoration: none; color: #7b3fbf;" > My Favorites</a></h4>
                                 <p class="h2"><?php echo $favoritesCount; ?></p>
                             </div>
                         </div>
@@ -806,17 +915,23 @@ try {
                         <div class="col-md-6">
                             <div class="info-card">
                                 <h4><i class="fas fa-history"></i> Last Viewed Books</h4>
-                                <ul>
+                                <div class="book-list-container">
                                     <?php if (!empty($lastViewedBooks)): ?>
                                         <?php foreach ($lastViewedBooks as $book): ?>
-                                            <li>
-                                                **<?php echo htmlspecialchars($book['Title']); ?>** by <?php echo htmlspecialchars($book['AuthorName']); ?>
-                                            </li>
+                                            <a href="BookPage.php?isbn=<?php echo htmlspecialchars($book['ISBN']); ?>" class="book-link-item">
+                                                <div class="book-item">
+                                                    <img src="<?php echo htmlspecialchars($book['CoverPicture']); ?>" alt="<?php echo htmlspecialchars($book['Title']); ?> Cover" class="book-cover">
+                                                    <div class="book-details">
+                                                        <span class="book-title"><?php echo htmlspecialchars($book['Title']); ?></span>
+                                                        <span class="book-author">by <?php echo htmlspecialchars($book['AuthorName']); ?></span>
+                                                    </div>
+                                                </div>
+                                            </a>
                                         <?php endforeach; ?>
                                     <?php else: ?>
-                                        <li>No books viewed yet.</li>
+                                        <p>No books viewed yet.</p>
                                     <?php endif; ?>
-                                </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -825,7 +940,7 @@ try {
                     <div class="row">
                         <div class="col-md-6">
                             <div class="info-card">
-                                <h4><i class="fas fa-book"></i> Currently Borrowed Books</h4>
+                                <h4><i class="fas fa-book"></i> <a href="BorrowNReserve.php" style="text-decoration: none; color: #7b3fbf;" >Currently Borrowed Books </a></h4>
                                 <ul>
                                     <?php while ($row = $borrowedResult->fetch_assoc()): ?>
                                         <li>**<?php echo htmlspecialchars($row['Title']); ?>** - Due: <?php echo htmlspecialchars($row['Due_Date']); ?></li>
@@ -836,7 +951,7 @@ try {
                         </div>
                         <div class="col-md-6">
                             <div class="info-card">
-                                <h4><i class="fas fa-bookmark"></i> Reserved Books</h4>
+                                <h4><i class="fas fa-bookmark"></i> <a href="BorrowNReserve.php" style="text-decoration: none; color: #7b3fbf;" > Reserved Books </a></h4>
                                 <ul>
                                     <?php while ($row = $reservedResult->fetch_assoc()): ?>
                                         <li>**<?php echo htmlspecialchars($row['Title']); ?>**</li>

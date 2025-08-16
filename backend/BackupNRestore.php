@@ -75,7 +75,8 @@ function import_data($con, $file)
         'Novels', 'Magazines', 'TextBook', 'BookCopy', 'Books',
         'Author', 'Librarian', 'Admin', 'Teacher', 'Student',
         'General', 'Guest', 'Registered', 'Employee', 'Members',
-        'LoginCredentials', 'Shelf', 'Library_Sections', 'Genres'
+        'LoginCredentials', 'Shelf', 'Library_Sections', 'Genres',
+        'BookRequests'
     ];
 
     if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -161,7 +162,8 @@ $EXPORT_PRESETS = [
             'Books', 'TextBook', 'Comics', 'Novels', 'Magazines',
             'Book_Genres', 'BookCopy', 'BookReviews', 'BookInteractions',
             'Reservation', 'Borrow',
-            'MaintenanceLog', 'BooksAdded'
+            'MaintenanceLog', 'BooksAdded',
+            'BookRequests'
         ],
         'filename' => 'full_backup_',
         'desc' => 'Admin created a full database backup.'

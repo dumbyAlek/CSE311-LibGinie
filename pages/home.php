@@ -82,20 +82,51 @@ if (!$is_guest) {
     // Your Read: from the BookInteractions table
     $readBooks = getBooks($con, "SELECT b.ISBN, b.Title, b.CoverPicture FROM Books b INNER JOIN BookInteractions bi ON b.ISBN = bi.ISBN WHERE bi.UserID = ? AND bi.IsRead = 1 LIMIT 10", [$user_id], "i");
 
-    // Recommended For You: Based on the genres of their favorite and read books
-    $sql_genres = "SELECT DISTINCT bg.GenreID FROM BookInteractions bi JOIN Book_Genres bg ON bi.ISBN = bg.ISBN WHERE bi.UserID = ?";
+    // --- Recommended For You: Based on the genres of user's favorite and read books ---
+
+    // Step 1: Get the genres the user has interacted with
+    $sql_genres = "
+        SELECT DISTINCT bg.GenreID
+        FROM BookInteractions bi
+        JOIN Book_Genres bg ON bi.ISBN = bg.ISBN
+        WHERE bi.UserID = ?
+    ";
     $user_genres = getBooks($con, $sql_genres, [$user_id], "i");
 
     $recommendedBooks = [];
+
     if (!empty($user_genres)) {
+        // Extract genre IDs
         $genre_ids = array_column($user_genres, 'GenreID');
-        $in_clause = str_repeat('?,', count($genre_ids) - 1) . '?';
-        $sql_recommended = "SELECT DISTINCT b.ISBN, b.Title, b.CoverPicture FROM Books b JOIN Book_Genres bg ON b.ISBN = bg.ISBN WHERE bg.GenreID IN ($in_clause) LIMIT 10";
-        $types = str_repeat('i', count($genre_ids));
-        $recommendedBooks = getBooks($con, $sql_recommended, $genre_ids, $types);
+
+        // Create placeholders (?, ?, ?, ...)
+        $in_clause = implode(',', array_fill(0, count($genre_ids), '?'));
+
+        // Step 2: Get recommended books from those genres 
+        // that the user has NOT interacted with
+        $sql_recommended = "
+            SELECT DISTINCT b.ISBN, b.Title, b.CoverPicture
+            FROM Books b
+            JOIN Book_Genres bg ON b.ISBN = bg.ISBN
+            WHERE bg.GenreID IN ($in_clause)
+            AND b.ISBN NOT IN (
+                SELECT ISBN 
+                FROM BookInteractions 
+                WHERE UserID = ? AND (IsFavorite = 1 OR IsRead = 1 OR InWishlist = 1)
+            )
+            ORDER BY RAND()
+            LIMIT 10
+        ";
+
+        // Prepare query parameters
+        $params = array_merge($genre_ids, [$user_id]);
+        $types  = str_repeat('i', count($genre_ids)) . 'i';
+
+        // Fetch recommended books
+        $recommendedBooks = getBooks($con, $sql_recommended, $params, $types);
     }
+
 }
-$con->close();
 ?>
 
 <!DOCTYPE html>
@@ -294,7 +325,7 @@ $con->close();
             text-align: center;
             text-decoration: none;
             color: inherit;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, height 0.3s;
         }
 
         .book-card img {
@@ -307,10 +338,20 @@ $con->close();
             font-weight: bold;
             color: #7e189bff;
             border-radius: 0 0 8px 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: white-space 0.3s, overflow 0.3s;
         }
         .book-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-10px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            height: auto;
+        }
+        .book-card:hover p {
+            white-space: normal; /* Allow text to wrap */
+            overflow: visible; /* Show all text */
+            /* text-overflow: unset; Remove ellipsis */
         }
 
         footer {
@@ -551,38 +592,35 @@ $con->close();
         </main>
         
         <?php
+        // Your existing code to check user role and session...
         if ($is_librarian && isset($_SESSION['UserID'])) {
-            require_once '../backend/crud/db_config.php';
-            $librarian_user_id = $_SESSION['UserID'];
-            $assigned_section = 'Not assigned yet';
-            $sql = "SELECT InChargeOf FROM Librarian WHERE UserID = ?";
-            $stmt = $con->prepare($sql);
-            if ($stmt) {
-                $stmt->bind_param("i", $librarian_user_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                if ($result->num_rows > 0) {
-                    $row = $result->fetch_assoc();
-                    $assigned_section = htmlspecialchars($row['InChargeOf']);
-                }
-                $stmt->close();
+                $librarian_user_id = $_SESSION['UserID'];
+                $assigned_section = 'Not assigned yet';
+                
+                $sql = "SELECT InChargeOf FROM Librarian WHERE UserID = ?";
+                $stmt = $con->prepare($sql);
+                if ($stmt) {
+                    $stmt->bind_param("i", $librarian_user_id);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    
+                    if ($result->num_rows > 0) {
+                        $row = $result->fetch_assoc();
+                        $assigned_section = htmlspecialchars($row['InChargeOf']);
+                    }
+                    $stmt->close();
             }
-            $con->close();
             ?>
-            <div class="librarian-tasks" id="taskBox">
-                <div class="tasks-header">
-                    <span>My Tasks</span>
-                    <button class="btn btn-sm btn-link text-dark" onclick="toggleTaskBox()">▼</button>
+                <div class="librarian-tasks" id="taskBox">
+                    <div class="tasks-header">
+                        Librarian Tasks
+                        <span onclick="toggleTaskBox()" style="cursor: pointer;">×</span>
+                    </div>
+                    <ul class="task-list">
+                        <strong>Assigned Section:</strong><br>
+                        <?php echo $assigned_section; ?>
+                    </ul>
                 </div>
-                <div style="font-size: 1.25rem; font-weight: bold;">
-                    Assigned Section:
-                </div>
-                <div style="font-size: 0.9rem; margin-top: 5px;">
-                    <?php echo $assigned_section; ?>
-                </div>
-                <ul class="task-list mt-2" style="font-size: 0.9rem;">
-                </ul>
-            </div>
             <?php
         }
         ?>
@@ -717,3 +755,8 @@ $con->close();
     </script>
 </body>
 </html>
+
+<?php
+// Close the database connection only once, after all database operations are complete
+$con->close(); 
+?>

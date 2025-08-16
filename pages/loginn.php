@@ -168,8 +168,7 @@ session_start();
     }
 
     function guestLogin() {
-      // This is where you would redirect for guest login
-      window.location.href = "home.php";
+      window.location.href = "../backend/crud/guestLogin.php";
     }
   </script>
 </body>

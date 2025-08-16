@@ -12,6 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
 
 // Path to your database configuration file
 require_once 'crud/db_config.php';
+require_once 'crud/log_action.php';
 
 // Check if the connection is successful
 if ($con->connect_error) {
@@ -21,7 +22,6 @@ if ($con->connect_error) {
 $email = trim($_POST['email']);
 $password_input = $_POST['password'];
 
-// CORRECTED: Column names now match your DDL's capitalization (Name, Email, PasswordHash)
 $sql = "SELECT m.UserID, m.Name, m.MembershipType, lc.PasswordHash 
         FROM Members AS m
         JOIN LoginCredentials AS lc ON m.UserID = lc.UserID
@@ -35,12 +35,13 @@ $result = $stmt->get_result();
 if ($result->num_rows === 1) {
     $user = $result->fetch_assoc();
 
-    // CORRECTED: The key for retrieving the name from the result matches your DDL
     if (password_verify($password_input, $user['PasswordHash'])) {
     $_SESSION['UserID'] = $user['UserID'];
     $_SESSION['user_name'] = $user['Name'];
-    $_SESSION['membershipType'] = $user['MembershipType']; // <<< Add this line
+    $_SESSION['membershipType'] = $user['MembershipType']; 
     $_SESSION['loggedin'] = true;
+    // Log the action
+    log_action($user['UserID'], 'Login and SignUp', 'User ' . $user['Name'] . ' logged in.');
 
     header("Location: ../pages/home.php");
     exit();

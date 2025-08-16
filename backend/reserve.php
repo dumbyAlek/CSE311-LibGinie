@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'crud/db_config.php';
+require_once 'crud/log_action.php';
 
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: ../pages/loginn.php");
@@ -32,6 +33,7 @@ if ($row = $res->fetch_assoc()) {
         $stmt2->bind_param("ii", $user_id, $copy_id);
         $stmt2->execute();
         $con->commit();
+        log_action($_SESSION['UserID'], 'Borrow and Reserve', 'User ' . $_SESSION['user_name'] . ' reserved a book.');
         $msg = "Book reserved successfully!";
     } catch (Exception $e) {
         $con->rollback();

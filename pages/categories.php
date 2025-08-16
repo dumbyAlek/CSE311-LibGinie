@@ -358,6 +358,11 @@ $con->close();
             border-radius: 4px;
             margin-right: 20px;
         }
+        .book-card:hover {
+            transform: translateX(-5px);
+            color: #7b3fbf;
+            background-color: #f3e9ffff;;
+        }
         .book-info {
             flex-grow: 1;
         }
@@ -370,6 +375,10 @@ $con->close();
             color: #eee;
             border-color: #444;
         }
+        .book-card-link {
+            text-decoration: none; /* Removes the underline */
+            color: inherit; /* Inherits the text color from the parent */
+        }
     </style>
 </head>
 
@@ -377,68 +386,7 @@ $con->close();
 
     <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    <?php if (!$is_guest) : // Main sidebar for all logged-in users ?>
-    <nav class="sidebar closed" id="sidebar">
-        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="dashboard.php">Dashboard</a></li>
-            <li><a href="#">My Books</a></li>
-            <li><a href="#">Favorites</a></li>
-
-            <?php if ($user_role === 'admin') : ?>
-            <li><a href="../backend/BookMng.php">Book Management</a></li>
-            <li><a href="../backend/BookMain.php">Book Maintenance</a></li>
-            <li><a href="SecsNShelves.php">Sections & Shelves</a></li>
-            <li><a href="../backend/MemMng.php">Member Management</a></li>
-            <li><a href="../backend/EmpMng.php">Employee Management</a></li>
-            <?php elseif ($is_librarian) : ?>
-            <li><a href="../backend/MemMng.php">Member Management</a></li>
-            <li><a href="#">Request Book</a></li>
-            <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
-            <li><a href="#">Request Book</a></li>
-            <li><a href="#">Borrowed Books</a></li>
-            <?php endif; ?>
-
-            <?php if ($user_role === 'author') : ?>
-            <li><a href="author_account.html">My Account</a></li>
-            <?php endif; ?>
-            
-            <li class="collapsible-header" onclick="toggleSublist('categoryList')" aria-expanded="false" aria-controls="categoryList">
-                <span class="arrow">v</span> Categories
-            </li>
-            <ul class="sublist" id="categoryList" hidden>
-                <li><a href="categories.php?category=Text Books">Text Books</a></li>
-                <li><a href="categories.php?category=Comics">Comics</a></li>
-                <li><a href="categories.php?category=Novels">Novels</a></li>
-                <li><a href="categories.php?category=Magazines">Magazines</a></li>
-            </ul>
-
-            <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
-                <span class="arrow">></span> Genres
-            </li>
-            <ul class="sublist" id="genreList" hidden>
-                <li><a href="#">Fantasy</a></li>
-                <li><a href="#">Horror</a></li>
-                <li><a href="#">Romance</a></li>
-                <li><a href="#">[Browse All Genres]</a></li>
-            </ul>
-            
-            <li><a href="#">Reserved</a></li>
-            <li><a href="settings.php">Settings</a></li>
-            <li><a href="../backend/logout.php">Logout</a></li>
-        </ul>
-    </nav>
-    <?php else: // Sidebar for Guest users only ?>
-    <nav class="sidebar closed" id="sidebar">
-        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="signup.php">Sign Up</a></li>
-            <li><a href="#" class="disabled-link">Reserved</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="../pages/loginn.php">Log In</a></li>
-        </ul>
-    </nav>
-    <?php endif; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div class="content-wrapper">
         <main class="container mt-4">
@@ -450,7 +398,7 @@ $con->close();
                         type="search" 
                         name="search" 
                         class="form-control search-input" 
-                        placeholder="Search books..." 
+                        id="searchInput" placeholder="Search books..." 
                         value="<?php echo htmlspecialchars($search_query); ?>"
                     >
                 </form>
@@ -461,19 +409,21 @@ $con->close();
             <?php else: ?>
                 <div class="book-list">
                     <?php foreach ($books as $book): ?>
-                        <div class="book-card">
-                            <?php if ($book['CoverPicture']): ?>
-                                <img src="<?php echo htmlspecialchars($book['CoverPicture']); ?>" alt="Cover of <?php echo htmlspecialchars($book['Title']); ?>">
-                            <?php else: ?>
-                                <img src="../images/no-cover.png" alt="No cover available">
-                            <?php endif; ?>
-                            <div class="book-info">
-                                <h5><?php echo htmlspecialchars($book['Title']); ?></h5>
-                                <p><strong>Author:</strong> <?php echo htmlspecialchars($book['AuthorName'] ?? 'Unknown'); ?></p>
-                                <p><strong>ISBN:</strong> <?php echo htmlspecialchars($book['ISBN']); ?></p>
-                                <p><strong>Genres:</strong> <?php echo htmlspecialchars($book['Genres'] ?? 'N/A'); ?></p>
+                        <a href="BookPage.php?isbn=<?php echo htmlspecialchars($book['ISBN']); ?>" class="book-card-link">
+                            <div class="book-card">
+                                <?php if ($book['CoverPicture']): ?>
+                                    <img src="<?php echo htmlspecialchars($book['CoverPicture']); ?>" alt="Cover of <?php echo htmlspecialchars($book['Title']); ?>">
+                                <?php else: ?>
+                                    <img src="../images/no-cover.png" alt="No cover available">
+                                <?php endif; ?>
+                                <div class="book-info">
+                                    <h5><?php echo htmlspecialchars($book['Title']); ?></h5>
+                                    <p><strong>Author:</strong> <?php echo htmlspecialchars($book['AuthorName'] ?? 'Unknown'); ?></p>
+                                    <p><strong>ISBN:</strong> <?php echo htmlspecialchars($book['ISBN']); ?></p>
+                                    <p><strong>Genres:</strong> <?php echo htmlspecialchars($book['Genres'] ?? 'N/A'); ?></p>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
@@ -502,6 +452,56 @@ $con->close();
             sublist.hidden = isExpanded;
             sublist.classList.toggle('show');
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchForm = document.querySelector('.search-form');
+            const bookList = document.querySelector('.book-list');
+
+            // Debounce function to delay execution
+            function debounce(func, delay) {
+                let timeout;
+                return function(...args) {
+                    const context = this;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(context, args), delay);
+                };
+            }
+
+            const handleSearch = debounce(() => {
+                const formData = new FormData(searchForm);
+                const urlParams = new URLSearchParams(formData);
+
+                // Construct the URL for the AJAX request
+                const url = searchForm.getAttribute('action') + '?' + urlParams.toString();
+
+                // Fetch the search results from the server
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest' // Helps PHP identify an AJAX request
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    // Find and replace the book list section
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newBookList = doc.querySelector('.book-list');
+                    
+                    // Replace the old content with the new content
+                    if (newBookList) {
+                        bookList.innerHTML = newBookList.innerHTML;
+                    } else {
+                        // Handle case where no books are found
+                        bookList.innerHTML = `<div class="alert alert-warning">No books found in the selected category matching your search.</div>`;
+                    }
+                })
+                .catch(error => console.error('Error fetching search results:', error));
+
+            }, 500); // 500ms delay
+
+            searchInput.addEventListener('input', handleSearch);
+        });
     </script>
 </body>
 </html>

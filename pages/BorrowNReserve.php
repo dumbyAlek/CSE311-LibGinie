@@ -5,6 +5,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     exit;
 }
 require_once '../backend/crud/db_config.php';
+require_once '../backend/crud/log_action.php';
 
 $user_id = $_SESSION['UserID'];
 $msg = "";
@@ -32,6 +33,16 @@ if (isset($_GET['borrow'])) {
             $stmt2->bind_param("iis", $user_id, $copy_id, $due_date);
             $stmt2->execute();
             $con->commit();
+
+            // Query to remove the book from the user's wishlist
+            $stmt3 = $con->prepare("UPDATE BookInteractions SET InWishlist = FALSE WHERE UserID = ? AND ISBN = ?");
+            $stmt3->bind_param("is", $user_id, $isbn);
+            $stmt3->execute();
+            $con->commit();
+
+            // Log the action
+            $_SESSION['user_name'] = $uname;
+            log_action($user_id, 'Borrow and Reserve', 'User ' . $uname . ' borrowed a book.');
             $msg = "Book borrowed successfully! Due date: $due_date";
         } catch (Exception $e) {
             $con->rollback();
@@ -60,7 +71,17 @@ if (isset($_GET['reserve'])) {
             $stmt2->bind_param("ii", $user_id, $copy_id);
             $stmt2->execute();
             $con->commit();
+
+            // Query to remove the book from the user's wishlist
+            $stmt3 = $con->prepare("UPDATE BookInteractions SET InWishlist = FALSE WHERE UserID = ? AND ISBN = ?");
+            $stmt3->bind_param("is", $user_id, $isbn);
+            $stmt3->execute();
+            $con->commit();
+
             $msg = "Book reserved successfully!";
+            // Log the action
+            $_SESSION['user_name'] = $uname;
+            log_action($user_id, 'Borrow and Reserve', 'User ' . $uname . ' reserved a book.');
         } catch (Exception $e) {
             $con->rollback();
             $msg = "Error reserving book.";
@@ -86,6 +107,9 @@ if (isset($_GET['cancel'])) {
             $con->query("DELETE FROM Reservation WHERE ResID=$res_id");
             $con->query("UPDATE BookCopy SET Status='Available' WHERE CopyID=$copy_id");
             $con->commit();
+            // Log the action
+            $_SESSION['user_name'] = $uname;
+            log_action($user_id, 'Borrow and Reserve', 'User ' . $uname . ' cancelled a book reservation.');
             $msg = "Reservation cancelled successfully.";
         } catch (Exception $e) {
             $con->rollback();
@@ -117,6 +141,9 @@ if (isset($_GET['return'])) {
 
             $con->commit();
             $msg = "Book returned successfully.";
+            // Log the action
+            $_SESSION['user_name'] = $uname;
+            log_action($user_id, 'Borrow and Reserve', 'User ' . $uname . ' returned a book.');
         } catch (Exception $e) {
             $con->rollback();
             $msg = "Error returning book.";
@@ -197,7 +224,7 @@ $sql = "SELECT
         LEFT JOIN BookReviews br ON b.ISBN = br.ISBN
         WHERE brw.UserID = ?
         GROUP BY brw.BorrowID
-        ORDER BY brw.Return_Date IS NOT NULL, brw.Due_Date ASC"; 
+        ORDER BY brw.Return_Date IS NOT NULL, brw.Due_Date DESC"; 
 $stmt = $con->prepare($sql);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -251,6 +278,9 @@ if (isset($_GET['borrow_reserved'])) {
 
             $con->commit();
             $msg = "Book borrowed from reservation successfully! Due date: $due_date";
+            // Log the action
+            $_SESSION['user_name'] = $uname;
+            log_action($user_id, 'Borrow and Reservee', 'User ' . $uname . ' borrwed a book.');
         } catch (Exception $e) {
             $con->rollback();
             $msg = "Error borrowing reserved book.";
@@ -558,33 +588,45 @@ if (isset($_GET['borrow_reserved'])) {
                         </tr>
                     </thead>
                     <tbody>
-                    <?php foreach ($borrow_history as $bh): ?>
-                        <tr onclick="window.location.href='BookPage.php?isbn=<?=urlencode($bh['ISBN'])?>'">
-                            <td class="text-center">
-                                <?php if (!empty($bh['CoverPicture'])): ?>
-                                    <img src="<?=htmlspecialchars($bh['CoverPicture'])?>" alt="Book Cover" class="book-cover">
-                                <?php else: ?>
-                                    <span class="text-muted">No Cover</span>
-                                <?php endif; ?>
-                            </td>
-                            <td><?=htmlspecialchars($bh['Title'])?></td>
-                            <td><?=htmlspecialchars($bh['AuthorName'] ?? 'Unknown')?></td>
-                            <td><?=$bh['Borrow_Date']?></td>
-                            <td><?=$bh['Due_Date']?></td>
-                            <td><?=$bh['Return_Date'] ?? 'Not Returned'?></td>
-                            <td><?=($bh['Fine'] > 0) ? "₹".$bh['Fine'] : '-'?></td>
-                            <td>
-                                <?php if ($bh['Return_Date'] === null): ?>
-                                    <a href="?return=<?=$bh['CopyID']?>" class="btn btn-sm btn-warning" onclick="event.stopPropagation()">Return</a>
-                                <?php else: ?>
-                                    -
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                    <?php if (empty($borrow_history)) echo "<tr><td colspan='8' class='text-center text-muted'>No borrow history.</td></tr>"; ?>
+                        <?php 
+                        $limit = 5; 
+                        $count = 0; 
+                        foreach ($borrow_history as $bh): 
+                            $count++;
+                            $hidden = ($count > $limit) ? 'd-none extra-row' : '';
+                        ?>
+                            <tr class="<?= $hidden ?>" onclick="window.location.href='BookPage.php?isbn=<?=urlencode($bh['ISBN'])?>'">
+                                <td class="text-center">
+                                    <?php if (!empty($bh['CoverPicture'])): ?>
+                                        <img src="<?=htmlspecialchars($bh['CoverPicture'])?>" alt="Book Cover" class="book-cover">
+                                    <?php else: ?>
+                                        <span class="text-muted">No Cover</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?=htmlspecialchars($bh['Title'])?></td>
+                                <td><?=htmlspecialchars($bh['AuthorName'] ?? 'Unknown')?></td>
+                                <td><?=$bh['Borrow_Date']?></td>
+                                <td><?=$bh['Due_Date']?></td>
+                                <td><?=$bh['Return_Date'] ?? 'Not Returned'?></td>
+                                <td><?=($bh['Fine'] > 0) ? "₹".$bh['Fine'] : '-'?></td>
+                                <td>
+                                    <?php if ($bh['Return_Date'] === null): ?>
+                                        <a href="?return=<?=$bh['CopyID']?>" class="btn btn-sm btn-warning" onclick="event.stopPropagation()">Return</a>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <?php if (empty($borrow_history)) echo "<tr><td colspan='8' class='text-center text-muted'>No borrow history.</td></tr>"; ?>
+
                     </tbody>
                 </table>
+                         <?php if (count($borrow_history) > $limit): ?>
+                            <div class="text-center mt-3">
+                                <button id="seeAllBtn" class="btn btn-primary btn-sm"> See All </button>
+                            </div>
+                        <?php endif; ?>
             </div>
         </main>
     </div>
@@ -622,6 +664,30 @@ if (isset($_GET['borrow_reserved'])) {
                 document.getElementById('searchForm').submit();
             }
         });
+
+        document.getElementById('seeAllBtn')?.addEventListener('click', function() {
+            document.querySelectorAll('.extra-row').forEach(row => row.classList.remove('d-none'));
+            this.style.display = 'none'; // Hide button after expanding
+        });
+
+        const toggleBtn = document.getElementById('toggleHistoryBtn');
+        if (toggleBtn) {
+            let expanded = false;
+            toggleBtn.addEventListener('click', function() {
+                const rows = document.querySelectorAll('.extra-row');
+                if (!expanded) {
+                    // Show hidden rows
+                    rows.forEach(row => row.classList.remove('d-none'));
+                    toggleBtn.textContent = "Hide";
+                    expanded = true;
+                } else {
+                    // Hide rows again
+                    rows.forEach(row => row.classList.add('d-none'));
+                    toggleBtn.textContent = "See All";
+                    expanded = false;
+                }
+            });
+        }
     </script>
 </body>
 </html>
