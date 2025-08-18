@@ -584,3 +584,63 @@
 [2025-08-18 04:55:27] [UserID: 3] [Book Request]: User  requested a book.
 [2025-08-18 04:57:34] [UserID: 1] [Login and SignUp]: User Admin logged in.
 [2025-08-18 05:02:17] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 06:33:35] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-18 06:39:19] [UserID: 1] [Data Import]: Admin imported data from a SQL file.
+[2025-08-18 06:43:59] [UserID: 1] [Book Management]: User Admin User added a new book.
+[2025-08-18 06:43:59] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 06:44:18] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-18 06:44:25] [UserID: ] [Book Management]: User  deleted a book.
+[2025-08-18 06:44:54] [UserID: 102] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-18 06:45:02] [UserID: 102] [Book Interaction]: User  interacted with a book.
+[2025-08-18 06:45:04] [UserID: 102] [Book Interaction]: User  interacted with a book.
+[2025-08-18 06:45:41] [UserID: 3] [Login and SignUp]: User J. K. Rowling logged in.
+[2025-08-18 06:46:19] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 06:48:29] [UserID: 104] [Login and SignUp]: User Ayon signed up.
+[2025-08-18 06:54:10] [UserID: 106] [Login and SignUp]: User Fahad signed up.
+[2025-08-18 06:54:31] [UserID: 106] [Login and SignUp]: User Fahad logged in.
+[2025-08-18 06:54:47] [UserID: 106] [Book Request]: User  requested a book.
+[2025-08-18 06:55:01] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 06:55:10] [UserID: 1] [Book Request]: User Admin book request declined.
+[2025-08-18 06:56:31] [UserID: 1] [Data Import]: Admin imported data from a SQL file.
+[2025-08-18 07:00:10] [UserID: 103] [Login and SignUp]: User Ayon signed up.
+[2025-08-18 07:01:02] [UserID: 103] [Book Request]: User  requested a book.
+[2025-08-18 07:01:14] [UserID: 102] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-18 07:01:26] [UserID: 102] [Book Request]: User  requested a book.
+[2025-08-18 07:01:34] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 07:01:43] [UserID: 1] [Book Request]: User Admin book request declined.
+[2025-08-18 07:05:51] [UserID: 55] [Book Request]: User  book added from requests.
+[2025-08-18 07:07:34] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 07:08:56] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 07:26:56] [UserID: 104] [Login and SignUp]: User Ayon signed up.
+[2025-08-18 07:27:08] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 07:29:29] [UserID: 105] [Login and SignUp]: User Ayon signed up.
+[2025-08-18 07:29:39] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 07:32:38] [UserID: 106] [Login and SignUp]: User Ayon signed up.
+[2025-08-18 07:32:45] [UserID: 106] [Book Interaction]: User  interacted with a book.
+[2025-08-18 07:32:46] [UserID: 106] [Book Interaction]: User  interacted with a book.
+[2025-08-18 07:33:01] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 07:37:19] [UserID: 1] [Book Management]: User Admin added a new book.
+[2025-08-18 07:37:19] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 09:26:08] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 09:30:38] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 09:30:50] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 09:30:52] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 09:30:54] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 09:30:58] [UserID: 1] [Borrow and Reserve]: User  reserved a book.
+[2025-08-18 09:30:58] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 09:31:29] [UserID: 1] [Book Interaction]: User  submitede a book review.
+[2025-08-18 09:31:36] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 09:31:49] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 09:32:05] [UserID: 1] [Book Interaction]: User  submitede a book review.
+[2025-08-18 09:32:06] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 09:46:59] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 10:34:14] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 10:34:46] [UserID: 1] [Book Maintenance]: User Admin added a book for maintanence.
+[2025-08-18 10:34:54] [UserID: 1] [Book Maintenance]: User Admin resolved a book issue.
+[2025-08-18 10:35:43] [UserID: 1] [Data Export]: Admin created a full database backup.
+[2025-08-18 10:35:47] [UserID: 1] [Data Export]: Admin created a full database backup.
+[2025-08-18 10:36:10] [UserID: 1] [Data Import]: Admin imported data from a SQL file.
+[2025-08-18 10:36:23] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 10:36:35] [UserID: 1] [Book Interaction]: User  submitede a book review.
+[2025-08-18 10:36:36] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 10:45:08] [UserID: 1] [Book Interaction]: User  interacted with a book.

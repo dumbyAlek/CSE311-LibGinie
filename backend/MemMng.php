@@ -193,7 +193,7 @@ $con->close();
             content: "≡";
             color: white;
             font-size: 20px;
-            transform: rotate(90deg);
+            transform: rotate(90deg); /* Rotated vertical bars */
         }
 
         .content-wrapper {
@@ -321,7 +321,7 @@ $con->close();
     </style>
 </head>
 <body>
-    <button class="sidebar-toggle-btn"></button>
+    <button class="sidebar-toggle-btn">☰</button>
 
     <?php include 'sidebar.php'; ?>
 
