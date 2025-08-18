@@ -170,8 +170,7 @@ try {
                 LEFT JOIN BookInteractions AS bi ON b.ISBN = bi.ISBN 
                 WHERE a.UserID = ? 
                 GROUP BY b.ISBN 
-                ORDER BY TotalBorrows DESC 
-                LIMIT 5
+                ORDER BY TotalBorrows DESC
             ");
             $stmt->bind_param("i", $user_id);
             $stmt->execute();
@@ -752,8 +751,7 @@ try {
                             LEFT JOIN BookInteractions AS bi ON b.ISBN = bi.ISBN 
                             WHERE a.UserID = ? 
                             GROUP BY b.ISBN 
-                            ORDER BY TotalBorrows DESC 
-                            LIMIT 5
+                            ORDER BY TotalBorrows DESC
                         ");
                         $publishedBooksStmt->bind_param("i", $user_id);
                         $publishedBooksStmt->execute();
