@@ -16,7 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['query'])) {
     try {
         $stmt = $con->prepare("SELECT b.ISBN, b.Title, b.CoverPicture, b.Category, m.Name AS AuthorName, a.AuthorTitle, b.Description 
                                 FROM Books b LEFT JOIN Author a ON b.AuthorID = a.AuthorID LEFT JOIN Members m ON a.UserID = m.UserID 
-                                WHERE b.Title LIKE ? OR b.ISBN LIKE ? OR m.Name LIKE ?");
+                                WHERE b.Title LIKE ? OR b.ISBN LIKE ? OR m.Name LIKE ?
+                                ORDER BY b.Title");
         $stmt->bind_param("sss", $search_query, $search_query, $search_query);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -589,7 +590,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         /* Specific styles for this page */
-        .container { max-width: 900px; margin-top: 50px; }
+        .container { max-width: 1200px; margin-top: 50px; }
         .card { margin-bottom: 20px; }
         .table img { max-width: 50px; height: auto; }
     </style>

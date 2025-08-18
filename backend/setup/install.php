@@ -4,7 +4,7 @@
 // WARNING: Delete this file after running it once for security!
 
 // Path to your database configuration file
-require_once 'crud/db_config.php';
+require_once '../crud/db_config.php';
 
 // Password for 'password123'
 $passwordHash = '$2y$10$66OsT/.Gf89ymqJyhuaYLekBEZeKel5515XKSSrv5w0yXif1emvjG';
