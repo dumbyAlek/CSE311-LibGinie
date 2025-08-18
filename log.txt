@@ -568,3 +568,19 @@
 [2025-08-18 03:34:25] [UserID: 1] [Book Interaction]: User  interacted with a book.
 [2025-08-18 03:34:35] [UserID: 1] [Data Export]: Admin created a full database backup.
 [2025-08-18 03:34:45] [UserID: 1] [Data Import]: Admin imported data from a SQL file.
+[2025-08-18 04:14:26] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 04:48:56] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 04:49:01] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 04:49:10] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 04:49:15] [UserID: 1] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-18 04:49:15] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 04:49:20] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 04:49:22] [UserID: 1] [Borrow and Reserve]: User  reserved a book.
+[2025-08-18 04:49:23] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 04:49:55] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 04:49:56] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 04:53:33] [UserID: 1] [Book Maintenance]: User  added a book for maintanence.
+[2025-08-18 04:54:52] [UserID: 3] [Login and SignUp]: User J. K. Rowling logged in.
+[2025-08-18 04:55:27] [UserID: 3] [Book Request]: User  requested a book.
+[2025-08-18 04:57:34] [UserID: 1] [Login and SignUp]: User Admin logged in.
+[2025-08-18 05:02:17] [UserID: 1] [Login and SignUp]: User Admin logged in.
