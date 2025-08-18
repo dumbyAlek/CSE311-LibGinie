@@ -1,5 +1,6 @@
 <?php
 require_once 'db_config.php';
+require_once 'log_action.php';
 header('Content-Type: application/json');
 
 // Handle GET request to fetch a single book's data for editing
@@ -33,14 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['isbn'])) {
         $book = $result->fetch_assoc();
 
         if ($book) {
-    // Force the Genres value to be a string
-    if ($book['Genres'] === null) {
-        $book['Genres'] = '';
-    }
-        echo json_encode(['success' => true, 'book' => $book]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'Book not found.']);
-    }
+            if ($book['Genres'] === null) {
+                $book['Genres'] = '';
+            }
+            echo json_encode(['success' => true, 'book' => $book]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Book not found.']);
+        }
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
@@ -64,9 +64,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $section_id = $data['section_id'];
         $genres = isset($data['genres']) ? explode(',', $data['genres']) : [];
         $description = $data['description'] ?? null;
+        // Category-specific fields
+        $subject = $data['subject'] ?? null;
+        $edition = $data['edition'] ?? null;
+        $artist = $data['artist'] ?? null;
+        $studio = $data['studio'] ?? null;
+        $narrative = $data['narrative'] ?? null;
+        $timeline = $data['timeline'] ?? null;
 
         try {
-            // Find or create AuthorID based on the new author_name
+            $con->begin_transaction();
+
+            // Find or create AuthorID
             $author_id = null;
             $stmt_author = $con->prepare("
                 SELECT a.AuthorID, m.UserID
@@ -81,16 +90,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($row_author = $result_author->fetch_assoc()) {
                 $author_id = $row_author['AuthorID'];
             } else {
-                // If no Author found with this name, check if a general Member with this name exists
                 $stmt_check_member = $con->prepare("SELECT UserID FROM Members WHERE Name = ?");
                 $stmt_check_member->bind_param("s", $author_name);
                 $stmt_check_member->execute();
                 $result_member = $stmt_check_member->get_result();
 
                 if ($row_member = $result_member->fetch_assoc()) {
-                    // Member exists, so promote them to an Author
                     $new_user_id = $row_member['UserID'];
-                    // Ensure they are also in the Registered table before making them an Author
                     $stmt_check_reg = $con->prepare("SELECT UserID FROM Registered WHERE UserID = ?");
                     $stmt_check_reg->bind_param("i", $new_user_id);
                     $stmt_check_reg->execute();
@@ -110,9 +116,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $author_id = $stmt_new_author->insert_id;
                     $stmt_new_author->close();
                 } else {
-                    // Neither Member nor Author exists, so create all necessary records
-                    $stmt_member = $con->prepare("INSERT INTO Members (Name, Email, MembershipType) VALUES (?, ?, 'Registered')");
                     $email = str_replace(' ', '.', strtolower($author_name)) . '@example.com';
+                    $stmt_member = $con->prepare("INSERT INTO Members (Name, Email, MembershipType) VALUES (?, ?, 'Registered')");
                     $stmt_member->bind_param("ss", $author_name, $email);
                     $stmt_member->execute();
                     $new_user_id = $stmt_member->insert_id;
@@ -132,8 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt_check_member->close();
             }
             $stmt_author->close();
-                        
-                        // Validate or create section
+
+            // Validate or create section
             if (!empty($section_id) && is_numeric($section_id)) {
                 $stmt_check_section = $con->prepare("SELECT SectionID FROM Library_Sections WHERE SectionID = ?");
                 $stmt_check_section->bind_param("i", $section_id);
@@ -141,25 +146,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result_check_section = $stmt_check_section->get_result();
 
                 if ($result_check_section->num_rows === 0) {
-                    // Let MySQL assign the ID if table uses AUTO_INCREMENT
                     $new_section_name = "Section " . $section_id;
                     $stmt_create_section = $con->prepare("INSERT INTO Library_Sections (Name) VALUES (?)");
                     $stmt_create_section->bind_param("s", $new_section_name);
                     $stmt_create_section->execute();
-                    $section_id = $stmt_create_section->insert_id; // Use the real SectionID
+                    $section_id = $stmt_create_section->insert_id;
                     $stmt_create_section->close();
                 }
                 $stmt_check_section->close();
             } else {
+                $con->rollback();
                 echo json_encode(['success' => false, 'message' => 'Invalid Section ID']);
                 exit;
             }
 
+            // Check current category to determine if it has changed
+            $stmt_current = $con->prepare("SELECT Category FROM Books WHERE ISBN = ?");
+            $stmt_current->bind_param("s", $isbn);
+            $stmt_current->execute();
+            $result_current = $stmt_current->get_result();
+            $current_category = $result_current->fetch_assoc()['Category'] ?? null;
+            $stmt_current->close();
 
-            // Update the main Books table
+            // Update the Books table
             $update_query = "UPDATE Books SET Title = ?, AuthorID = ?, SectionID = ?, Category = ?, Publisher = ?, PublishedYear = ?, Description = ?";
             $params = [$title, $author_id, $section_id, $category, $publisher, $published_year, $description];
-            $types = "siissis"; 
+            $types = "siissis";
             
             if ($cover_picture) {
                 $update_query .= ", CoverPicture = ?";
@@ -174,63 +186,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_update->bind_param($types, ...$params);
 
             if ($stmt_update->execute()) {
-                // Remove from specialized tables to handle category change
-                $stmt_del_textbook = $con->prepare("DELETE FROM TextBook WHERE ISBN = ?");
-                $stmt_del_textbook->bind_param("s", $isbn);
-                $stmt_del_textbook->execute();
-                $stmt_del_textbook->close();
+                // Handle category-specific data
+                if ($current_category !== $category) {
+                    // Delete from old category table if category has changed
+                    $stmt_del_textbook = $con->prepare("DELETE FROM TextBook WHERE ISBN = ?");
+                    $stmt_del_textbook->bind_param("s", $isbn);
+                    $stmt_del_textbook->execute();
+                    $stmt_del_textbook->close();
 
-                $stmt_del_comics = $con->prepare("DELETE FROM Comics WHERE ISBN = ?");
-                $stmt_del_comics->bind_param("s", $isbn);
-                $stmt_del_comics->execute();
-                $stmt_del_comics->close();
+                    $stmt_del_comics = $con->prepare("DELETE FROM Comics WHERE ISBN = ?");
+                    $stmt_del_comics->bind_param("s", $isbn);
+                    $stmt_del_comics->execute();
+                    $stmt_del_comics->close();
 
-                $stmt_del_novels = $con->prepare("DELETE FROM Novels WHERE ISBN = ?");
-                $stmt_del_novels->bind_param("s", $isbn);
-                $stmt_del_novels->execute();
-                $stmt_del_novels->close();
+                    $stmt_del_novels = $con->prepare("DELETE FROM Novels WHERE ISBN = ?");
+                    $stmt_del_novels->bind_param("s", $isbn);
+                    $stmt_del_novels->execute();
+                    $stmt_del_novels->close();
 
-                $stmt_del_magazines = $con->prepare("DELETE FROM Magazines WHERE ISBN = ?");
-                $stmt_del_magazines->bind_param("s", $isbn);
-                $stmt_del_magazines->execute();
-                $stmt_del_magazines->close();
+                    $stmt_del_magazines = $con->prepare("DELETE FROM Magazines WHERE ISBN = ?");
+                    $stmt_del_magazines->bind_param("s", $isbn);
+                    $stmt_del_magazines->execute();
+                    $stmt_del_magazines->close();
 
-                // Insert into the new specialized table based on category
-                if ($category === 'Text Books') {
-                    $stmt_insert = $con->prepare("INSERT INTO TextBook (ISBN, Editions, Subject) VALUES (?, ?, ?)");
-                    $editions = null; // Assuming these are not provided in the form
-                    $subject = null;
-                    $stmt_insert->bind_param("sis", $isbn, $editions, $subject);
-                    $stmt_insert->execute();
-                    $stmt_insert->close();
-                } elseif ($category === 'Comics') {
-                    $stmt_insert = $con->prepare("INSERT INTO Comics (ISBN, Artist, Studio) VALUES (?, ?, ?)");
-                    $artist = null;
-                    $studio = null;
-                    $stmt_insert->bind_param("sss", $isbn, $artist, $studio);
-                    $stmt_insert->execute();
-                    $stmt_insert->close();
-                } elseif ($category === 'Novels') {
-                    $stmt_insert = $con->prepare("INSERT INTO Novels (ISBN, Narration) VALUES (?, ?)");
-                    $narration = null;
-                    $stmt_insert->bind_param("ss", $isbn, $narration);
-                    $stmt_insert->execute();
-                    $stmt_insert->close();
-                } elseif ($category === 'Magazines') {
-                    $stmt_insert = $con->prepare("INSERT INTO Magazines (ISBN, Timeline) VALUES (?, ?)");
-                    $timeline = null;
-                    $stmt_insert->bind_param("ss", $isbn, $timeline);
-                    $stmt_insert->execute();
-                    $stmt_insert->close();
+                    // Insert into new category table
+                    switch ($category) {
+                        case 'Text Books':
+                            $stmt_insert = $con->prepare("INSERT INTO TextBook (ISBN, Subject, Editions) VALUES (?, ?, ?)");
+                            $stmt_insert->bind_param("ssi", $isbn, $subject, $edition);
+                            break;
+                        case 'Comics':
+                            $stmt_insert = $con->prepare("INSERT INTO Comics (ISBN, Artist, Studio) VALUES (?, ?, ?)");
+                            $stmt_insert->bind_param("sss", $isbn, $artist, $studio);
+                            break;
+                        case 'Novels':
+                            $stmt_insert = $con->prepare("INSERT INTO Novels (ISBN, Narration) VALUES (?, ?)");
+                            $stmt_insert->bind_param("ss", $isbn, $narrative);
+                            break;
+                        case 'Magazines':
+                            $stmt_insert = $con->prepare("INSERT INTO Magazines (ISBN, Timeline) VALUES (?, ?)");
+                            $stmt_insert->bind_param("ss", $isbn, $timeline);
+                            break;
+                        default:
+                            $stmt_insert = null;
+                    }
+                    if ($stmt_insert) {
+                        $stmt_insert->execute();
+                        $stmt_insert->close();
+                    }
+                } else {
+                    // Update existing category table
+                    switch ($category) {
+                        case 'Text Books':
+                            $stmt_update_cat = $con->prepare("UPDATE TextBook SET Subject = ?, Editions = ? WHERE ISBN = ?");
+                            $stmt_update_cat->bind_param("sis", $subject, $edition, $isbn);
+                            break;
+                        case 'Comics':
+                            $stmt_update_cat = $con->prepare("UPDATE Comics SET Artist = ?, Studio = ? WHERE ISBN = ?");
+                            $stmt_update_cat->bind_param("sss", $artist, $studio, $isbn);
+                            break;
+                        case 'Novels':
+                            $stmt_update_cat = $con->prepare("UPDATE Novels SET Narration = ? WHERE ISBN = ?");
+                            $stmt_update_cat->bind_param("ss", $narrative, $isbn);
+                            break;
+                        case 'Magazines':
+                            $stmt_update_cat = $con->prepare("UPDATE Magazines SET Timeline = ? WHERE ISBN = ?");
+                            $stmt_update_cat->bind_param("ss", $timeline, $isbn);
+                            break;
+                        default:
+                            $stmt_update_cat = null;
+                    }
+                    if ($stmt_update_cat) {
+                        $stmt_update_cat->execute();
+                        $stmt_update_cat->close();
+                    }
                 }
 
-                // Delete existing genres for the book
+                // Update genres
                 $stmt_delete_genres = $con->prepare("DELETE FROM Book_Genres WHERE ISBN = ?");
                 $stmt_delete_genres->bind_param("s", $isbn);
                 $stmt_delete_genres->execute();
                 $stmt_delete_genres->close();
 
-                // Insert new genres
                 foreach ($genres as $genre_name) {
                     $genre_name = trim($genre_name);
                     if (!empty($genre_name)) {
@@ -259,17 +296,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
                 }
+
+                $con->commit();
+                log_action($_SESSION['UserID'], 'Book Management', 'User ' . $_SESSION['user_name'] . ' updated a book.');
                 echo json_encode(['success' => true, 'message' => 'Book updated successfully.']);
             } else {
+                $con->rollback();
                 echo json_encode(['success' => false, 'message' => 'Failed to update book.']);
             }
             $stmt_update->close();
         } catch (Exception $e) {
+            $con->rollback();
             echo json_encode(['success' => false, 'message' => 'Update database error: ' . $e->getMessage()]);
         }
     } elseif ($action === 'delete_book') {
         try {
-            // Delete from all tables that have foreign key constraints
             $con->begin_transaction();
 
             $stmt_del_bg = $con->prepare("DELETE FROM Book_Genres WHERE ISBN = ?");
@@ -282,7 +323,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_del_va->execute();
             $stmt_del_va->close();
 
-            // Delete from child tables (TextBook, Comics, etc.) first
             $stmt_del_comic = $con->prepare("DELETE FROM Comics WHERE ISBN = ?");
             $stmt_del_comic->bind_param("s", $isbn);
             $stmt_del_comic->execute();
@@ -328,26 +368,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_del_copy->execute();
             $stmt_del_copy->close();
 
-            // Delete from BookReviews
             $stmt_del_reviews = $con->prepare("DELETE FROM BookReviews WHERE ISBN = ?");
             $stmt_del_reviews->bind_param("s", $isbn);
             $stmt_del_reviews->execute();
             $stmt_del_reviews->close();
 
-
-            // Finally, delete the book itself
             $stmt = $con->prepare("DELETE FROM Books WHERE ISBN = ?");
             $stmt->bind_param("s", $isbn);
 
             if ($stmt->execute()) {
                 $con->commit();
+                log_action($_SESSION['UserID'], 'Book Management', 'User ' . $_SESSION['user_name'] . ' deleted a book.');
                 echo json_encode(['success' => true, 'message' => 'Book and associated data deleted successfully.']);
             } else {
                 $con->rollback();
                 echo json_encode(['success' => false, 'message' => 'Failed to delete book.']);
             }
             $stmt->close();
-
         } catch (Exception $e) {
             $con->rollback();
             echo json_encode(['success' => false, 'message' => 'Delete database error: ' . $e->getMessage()]);
@@ -361,3 +398,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Fallback for invalid requests
 echo json_encode(['success' => false, 'message' => 'Invalid request method or action.']);
+?>

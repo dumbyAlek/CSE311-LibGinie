@@ -10,6 +10,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
 // Include your database configuration and functions
 require_once '../backend/crud/db_config.php';
+require_once '../backend/crud/log_action.php';
 
 // Check if an ISBN is provided in the URL
 if (!isset($_GET['isbn']) || empty($_GET['isbn'])) {
@@ -41,24 +42,27 @@ function getAverageRating($con, $isbn) {
     return $row['avg_rating'] ?? 0;
 }
 
-/**
- * @param mysqli $con
- * @param string $isbn
- * @return array|null
- */
 function getBookDetails($con, $isbn) {
     $sql = "
     SELECT
         b.ISBN, b.Title, b.CoverPicture, b.PublishedYear, b.Publisher, b.Description, b.Category,
         m.Name AS AuthorName,
-        GROUP_CONCAT(g.GenreName SEPARATOR ', ') AS Genres
+        GROUP_CONCAT(g.GenreName SEPARATOR ', ') AS Genres,
+        t.Subject, t.Editions,
+        c.Artist, c.Studio,
+        n.Narration,
+        mag.Timeline
     FROM Books b
     LEFT JOIN Author a ON b.AuthorID = a.AuthorID
     LEFT JOIN Members m ON a.UserID = m.UserID
     LEFT JOIN Book_Genres bg ON b.ISBN = bg.ISBN
     LEFT JOIN Genres g ON bg.GenreID = g.GenreID
+    LEFT JOIN TextBook t ON b.ISBN = t.ISBN AND b.Category = 'Text Books'
+    LEFT JOIN Comics c ON b.ISBN = c.ISBN AND b.Category = 'Comics'
+    LEFT JOIN Novels n ON b.ISBN = n.ISBN AND b.Category = 'Novels'
+    LEFT JOIN Magazines mag ON b.ISBN = mag.ISBN AND b.Category = 'Magazines'
     WHERE b.ISBN = ?
-    GROUP BY b.ISBN";
+GROUP BY b.ISBN, t.Subject, t.Editions, c.Artist, c.Studio, n.Narration, mag.Timeline";
 
     $stmt = $con->prepare($sql);
     $stmt->bind_param("s", $isbn);
@@ -109,6 +113,9 @@ function getUserInteraction($con, $user_id, $isbn) {
     $result = $stmt->get_result();
     $interaction = $result->fetch_assoc();
     $stmt->close();
+    // Log the action: User updated account information
+    $_SESSION['user_name'] = $uname;
+    log_action($user_id, 'Book Interaction', 'User ' . $uname . ' interacted with a book.');
     return $interaction ? $interaction : ['IsFavorite' => false, 'InWishlist' => false, 'IsRead' => false];
 }
 
@@ -396,6 +403,7 @@ $con->close();
 
     <div class="content-wrapper">
         <main class="container mt-4">
+            <div id="borrow-message" class="mt-3"></div>
             <div class="book-details-container">
                 <div class="row">
                     <div class="col-md-4 text-center mb-3 mb-md-0">
@@ -409,9 +417,21 @@ $con->close();
                         <div class="book-info">
                             <h1 class="mb-2"><?php echo htmlspecialchars($book['Title']); ?></h1>
                             <p><strong>Author:</strong> <?php echo htmlspecialchars($book['AuthorName'] ?? 'Unknown'); ?></p>
+                            <p><strong>ISBN:</strong> <?php echo htmlspecialchars($book['ISBN'] ?? 'Unknown'); ?></p>
                             <p><strong>Publisher:</strong> <?php echo htmlspecialchars($book['Publisher'] ?? 'Unknown'); ?></p>
                             <p><strong>Published Year:</strong> <?php echo htmlspecialchars($book['PublishedYear'] ?? 'N/A'); ?></p>
                             <p><strong>Genres:</strong> <?php echo htmlspecialchars($book['Genres'] ?? 'N/A'); ?></p>
+                            <?php if ($book['Category'] === 'Text Books' && ($book['Subject'] || $book['Editions'])): ?>
+                                <p><strong>Subject:</strong> <?php echo htmlspecialchars($book['Subject'] ?? 'N/A'); ?></p>
+                                <p><strong>Edition:</strong> <?php echo htmlspecialchars($book['Editions'] ?? 'N/A'); ?></p>
+                            <?php elseif ($book['Category'] === 'Comics' && ($book['Artist'] || $book['Studio'])): ?>
+                                <p><strong>Artist:</strong> <?php echo htmlspecialchars($book['Artist'] ?? 'N/A'); ?></p>
+                                <p><strong>Studio:</strong> <?php echo htmlspecialchars($book['Studio'] ?? 'N/A'); ?></p>
+                            <?php elseif ($book['Category'] === 'Novels' && $book['Narration']): ?>
+                                <p><strong>Narrative:</strong> <?php echo htmlspecialchars($book['Narration'] ?? 'N/A'); ?></p>
+                            <?php elseif ($book['Category'] === 'Magazines' && $book['Timeline']): ?>
+                                <p><strong>Timeline:</strong> <?php echo htmlspecialchars($book['Timeline'] ?? 'N/A'); ?></p>
+                            <?php endif; ?>
                             <div class="book-rating mb-3">
                                 <?php
                                 $rating = round($average_rating);
@@ -433,7 +453,7 @@ $con->close();
                             </div>
                             <div class="col-md-4">
                                 <button id="wishlistBtn" class="btn btn-secondary" data-status="<?php echo $user_interaction['InWishlist'] ? 'true' : 'false'; ?>">
-                                    <?php echo $user_interaction['InWishlist'] ? '✅ Wishlisted' : 'Wishlist'; ?>
+                                    <?php echo $user_interaction['InWishlist'] ? '✅ Wishlist' : 'Wishlist'; ?>
                                 </button>
                             </div>
                             <div class="col-md-4">
@@ -441,12 +461,19 @@ $con->close();
                                     <?php echo $user_interaction['IsFavorite'] ? '✅ Favorited' : 'Favorite'; ?>
                                 </button>
                             </div>
-                            <div class="col-md-6 mt-2">
-                                <a href="borrow_page.php?isbn=<?php echo htmlspecialchars($book['ISBN']); ?>" class="btn btn-primary">Borrow</a>
+                           <div class="col-md-12 mt-2 d-flex">
+                                <a href="../backend/borrow.php?isbn=<?=urlencode($isbn)?>&redirect=<?=urlencode($_SERVER['REQUEST_URI'])?>" 
+                                class="btn btn-success me-2 flex-fill" 
+                                onclick="return confirm('Are you sure you want to borrow this book?');">
+                                Borrow
+                                </a>
+                                <a href="../backend/reserve.php?isbn=<?=urlencode($isbn)?>&redirect=<?=urlencode($_SERVER['REQUEST_URI'])?>" 
+                                class="btn btn-info flex-fill" 
+                                onclick="return confirm('Are you sure you want to reserve this book?');">
+                                Reserve
+                                </a>
                             </div>
-                            <div class="col-md-6 mt-2">
-                                <a href="reserve_page.php?isbn=<?php echo htmlspecialchars($book['ISBN']); ?>" class="btn btn-info">Reserve</a>
-                            </div>
+
                         </div>
                         <?php endif; ?>
                     </div>
@@ -528,49 +555,82 @@ $con->close();
         // --- AJAX for user interaction buttons ---
         function updateBookStatus(action) {
             const isbn = "<?php echo htmlspecialchars($isbn); ?>";
-            const userId = "<?php echo htmlspecialchars($user_id); ?>";
+            const userId = "<?php echo htmlspecialchars($user_id); ?>"; 
             const btnId = `#${action}Btn`;
             const button = $(btnId);
-            const status = button.data('status') === 'true';
+            const currentStatus = button.data('status') === true;
+            const newStatus = !currentStatus;
+
+            button.attr('disabled', true).html('Updating...');
 
             $.ajax({
-                url: '../backend/book_action.php', // This file will handle the update
+                url: '../backend/book_action.php',
                 type: 'POST',
+                dataType: 'json',
                 data: {
                     isbn: isbn,
-                    userId: parseInt(userId),
+                    userId: userId,
                     action: action,
-                    status: !status // Toggle the status
+                    status: newStatus ? 'true' : 'false'
                 },
-                success: function(response) {
-                    try {
-                        const data = JSON.parse(response);
+                success: function(data) {
                         if (data.success) {
-                            button.data('status', !status);
+                            button.data('status', newStatus);
                             if (action === 'read') {
-                                button.text(!status ? '✅ Read' : 'Mark as Read');
+                                button.text(newStatus ? '✅ Read' : 'Mark as Read');
                             } else if (action === 'wishlist') {
-                                button.text(!status ? '✅ Wishlisted' : 'Wishlist');
+                                button.text(newStatus ? '✅ Wishlist' : 'Wishlist');
                             } else if (action === 'favorite') {
-                                button.text(!status ? '✅ Favorited' : 'Favorite');
+                                button.text(newStatus ? '✅ Favorited' : 'Favorite');
                             }
                         } else {
                             alert('Error updating status: ' + data.message);
                         }
-                    } catch (e) {
-                        //alert('An unexpected error occurred: ' + response);
-                    }
+                        button.attr('disabled', false);
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error:", error);
                     alert('An error occurred. Please try again.');
+                    button.attr('disabled', false);
                 }
             });
         }
 
         $(document).ready(function() {
-            $('#readBtn').on('click', function() { updateBookStatus('read'); });
-            $('#wishlistBtn').on('click', function() { updateBookStatus('wishlist'); });
-            $('#favoriteBtn').on('click', function() { updateBookStatus('favorite'); });
+            $('#readBtn').on('click', function() 
+            { 
+                updateBookStatus('read'); 
+
+            });
+
+            $('#wishlistBtn').on('click', function() 
+            { 
+                updateBookStatus('wishlist'); 
+            });
+
+            $('#favoriteBtn').on('click', function() 
+            { 
+                updateBookStatus('favorite'); 
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const msg = urlParams.get('msg');
+
+            if (msg) {
+                let alertClass = 'alert-success';
+                if (msg.includes('Error') || msg.includes('Sorry')) {
+                    alertClass = 'alert-danger';
+                }
+                $('#borrow-message').html(`<div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    ${msg}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>`);
+
+                // Optional: Remove the message from the URL after displaying it
+                // This prevents the message from reappearing on page refresh
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                window.history.replaceState({path: newUrl}, '', newUrl);
+            }
         });
 
         // --- Review Form and Star Rating ---

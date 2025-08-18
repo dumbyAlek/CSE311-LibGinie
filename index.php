@@ -1,3 +1,9 @@
+<?php 
+ini_set('display_errors', '0');        // Turn off displaying errors
+ini_set('display_startup_errors', '0'); // Turn off startup errors
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING); 
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

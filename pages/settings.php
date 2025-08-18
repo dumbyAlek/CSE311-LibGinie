@@ -64,9 +64,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $con->commit();
             $success_message = "Account information updated successfully!";
-            $_SESSION['user_name'] = $name; // Update the session variable for the name
             // Log the action: User updated account information
-            log_action($user_id, 'Account Update', 'User ' . $name . ' updated their account information.');
+            $_SESSION['user_name'] = $uname;
+            log_action($user_id, 'Account Update', 'User ' . $uname . ' updated their account information.');
         } catch (mysqli_sql_exception $e) {
             $con->rollback();
             $error_message = "Error updating account: " . $e->getMessage();
@@ -430,68 +430,7 @@ $con->close();
 
     <button class="sidebar-toggle-btn" onclick="toggleSidebar()">☰</button>
 
-    <?php if (!$is_guest) : // Main sidebar for all logged-in users ?>
-    <nav class="sidebar closed" id="sidebar">
-        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="dashboard.php">Dashboard</a></li>
-            <li><a href="#">My Books</a></li>
-            <li><a href="#">Favorites</a></li>
-
-            <?php if ($user_role === 'admin') : ?>
-            <li><a href="../backend/BookMng.php">Book Management</a></li>
-            <li><a href="../backend/BookMain.php">Book Maintenancet</a></li>
-            <li><a href="SecsNShelves.php">Sections & Shelves</a></li>
-            <li><a href="../backend/MemMng.php">Member Management</a></li>
-            <li><a href="EmpMng.html">Employee Management</a></li>
-            <?php elseif ($is_librarian) : ?>
-            <li><a href="MemberMng.html">Member Management</a></li>
-            <li><a href="#">Request Book</a></li>
-            <?php elseif (in_array($user_role, ['author', 'student', 'teacher', 'general'])) : ?>
-            <li><a href="#">Request Book</a></li>
-            <li><a href="#">Borrowed Books</a></li>
-            <?php endif; ?>
-
-            <?php if ($user_role === 'author') : ?>
-            <li><a href="author_account.html">My Account</a></li>
-            <?php endif; ?>
-            
-            <li class="collapsible-header" onclick="toggleSublist('categoryList')" aria-expanded="false" aria-controls="categoryList">
-                <span class="arrow">></span> Categories
-            </li>
-            <ul class="sublist" id="categoryList" hidden>
-                <li><a href="categories.php?category=Text Books">Text Books</a></li>
-                <li><a href="categories.php?category=Comics">Comics</a></li>
-                <li><a href="categories.php?category=Novels">Novels</a></li>
-                <li><a href="categories.php?category=Magazines">Magazines</a></li>
-            </ul>
-
-            <li class="collapsible-header" onclick="toggleSublist('genreList')" aria-expanded="false" aria-controls="genreList">
-                <span class="arrow">></span> Genres
-            </li>
-            <ul class="sublist" id="genreList" hidden>
-                <li><a href="#">Fantasy</a></li>
-                <li><a href="#">Horror</a></li>
-                <li><a href="#">Romance</a></li>
-                <li><a href="#">[Browse All Genres]</a></li>
-            </ul>
-            
-            <li><a href="#">Reserved</a></li>
-            <li><a href="settings.php">Settings</a></li>
-            <li><a href="../backend/logout.php">Logout</a></li>
-        </ul>
-    </nav>
-    <?php else: // Sidebar for Guest users only ?>
-    <nav class="sidebar closed" id="sidebar">
-        <a href="home.php"><img src="../images/logo3.png" alt="Logo" class="logo" /></a>
-        <ul>
-            <li><a href="signup.php">Sign Up</a></li>
-            <li><a href="#" class="disabled-link">Reserved</a></li>
-            <li><a href="#">Settings</a></li>
-            <li><a href="../backend/logout.php">Log In</a></li>
-        </ul>
-    </nav>
-    <?php endif; ?>
+    <?php include 'sidebar.php'; ?>
 
     <div class="content-wrapper">
         <main class="container mt-4">

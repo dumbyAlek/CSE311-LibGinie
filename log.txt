@@ -7,3 +7,564 @@
 [2025-08-15 03:32:50] [UserID: 1] [Data Export]: Admin created a full database backup.
 [2025-08-15 03:33:00] [UserID: 1] [Data Import]: Admin imported data from a SQL file.
 [2025-08-15 03:38:48] [UserID: 1] [Data Import]: Admin imported data from a SQL file.
+[2025-08-15 04:50:55] [UserID: 1] [Data Export]: Admin created a full database backup.
+[2025-08-15 19:13:38] [UserID: 1] [Account Update]: User Admin User updated their account information.
+[2025-08-16 11:47:01] [UserID: 1] [Account Update]: User Admin User updated their account information.
+[2025-08-16 11:55:34] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 11:55:54] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 11:59:58] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:00:08] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:00:10] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:01:19] [UserID: 1] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-16 12:01:25] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:02:07] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:10] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:11] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:12] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:14] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:16] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:02:18] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:02:21] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:04:12] [UserID: 1] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-16 12:05:28] [UserID: 1] [Borrow and Reservee]: User  reserved a book.
+[2025-08-16 12:05:50] [UserID: 1] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-16 12:08:52] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:09:00] [UserID: 1] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-16 12:09:04] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:09:25] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:09:26] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:09:28] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:09:31] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:11:35] [UserID: 1] [Borrow and Reserve]: User  cancelled a book reservation.
+[2025-08-16 12:11:40] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:11:42] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:11:46] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:12:28] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:12:29] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:12:32] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 12:12:35] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:12:49] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:12:57] [UserID: 1] [Borrow and Reserve]: User  reserved a book.
+[2025-08-16 12:15:45] [UserID: 1] [Borrow and Reserve]: User  reserved a book.
+[2025-08-16 12:15:46] [UserID: 1] [Borrow and Reserve]: User  reserved a book.
+[2025-08-16 12:15:49] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:15:58] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:17:22] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:18:13] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:20:58] [UserID: 1] [Borrow and Reservee]: User  borrwed a book.
+[2025-08-16 12:21:00] [UserID: 1] [Borrow and Reserve]: User  returned a book.
+[2025-08-16 12:23:37] [UserID: ] [Login and SignUp]: User  logged in.
+[2025-08-16 12:24:07] [UserID: ] [Login and SignUp]: User Array logged in.
+[2025-08-16 12:24:54] [UserID: ] [Login and SignUp]: User  logged in.
+[2025-08-16 12:26:15] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 12:28:31] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 12:29:20] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 12:30:07] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 12:30:23] [UserID: 5] [Book Request]: User  requested a book.
+[2025-08-16 12:30:30] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 12:36:23] [UserID: ] [Book Request]: User  book request declined.
+[2025-08-16 12:39:40] [UserID: 10] [Book Request]: User  book added from requests.
+[2025-08-16 13:36:54] [UserID: 10] [Book Interaction]: User  interacted with a book.
+[2025-08-16 13:37:02] [UserID: 10] [Book Interaction]: User  interacted with a book.
+[2025-08-16 13:37:20] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 13:37:35] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 13:41:42] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 13:41:43] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 13:48:21] [UserID: 1] [Book Maintenance]: User  added a book for maintanence.
+[2025-08-16 14:01:26] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:01:37] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:10:12] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:10:29] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:13:46] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:13:47] [UserID: 5] [Borrow and Reserve]: User  reserved a book.
+[2025-08-16 14:13:47] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:20:06] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:33:04] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:33:10] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:33:35] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:33:50] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:34:09] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:34:10] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:39:38] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:40:11] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:43:16] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:43:18] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 14:50:52] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 14:54:50] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 14:55:25] [UserID: 2] [Login and SignUp]: User AhsanAalok signed up.
+[2025-08-16 15:07:29] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 15:07:31] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 15:07:37] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 15:07:41] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 15:08:26] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 15:08:47] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 15:08:51] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 15:09:01] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 15:11:03] [UserID: 2] [Login and SignUp]: User AhsanAalok signed up.
+[2025-08-16 15:12:34] [UserID: 11] [Login and SignUp]: User Tisha signed up.
+[2025-08-16 15:21:38] [UserID: 2] [Login and SignUp]: User AhsanAalok signed up.
+[2025-08-16 16:07:00] [UserID: 2] [Login and SignUp]: User AhsanAalok signed up.
+[2025-08-16 16:07:23] [UserID: 2] [Login and SignUp]: User AhsanAalok logged in.
+[2025-08-16 16:07:36] [UserID: 2] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:03] [UserID: 7] [Login and SignUp]: User DIMBY signed up.
+[2025-08-16 16:08:39] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:42] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:45] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:55] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:08:56] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:09:01] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:09:14] [UserID: 7] [Book Interaction]: User  submitede a book review.
+[2025-08-16 16:09:15] [UserID: 7] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:09:24] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 16:09:26] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:09:31] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 16:10:37] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:12:49] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 16:14:38] [UserID: 5] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-16 16:16:46] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:16:47] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:16:53] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:16:57] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:16:58] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:17:15] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:18:31] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:08] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:09] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:11] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:12] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:12] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:13] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:14] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:14] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:15] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:15] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:16] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:16] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:17] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:18] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:18] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:19] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:19] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:19] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:20] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:20] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:19:21] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:21:31] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:21:32] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 16:23:39] [UserID: 5] [Book Interaction]: User  interacted with a book.
+[2025-08-16 17:00:23] [UserID: 5] [Account Update]: User  updated their account information.
+[2025-08-16 17:00:44] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:10:16] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 17:14:34] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-16 17:14:49] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-16 17:14:49] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-16 17:16:10] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-16 17:16:11] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-16 17:19:22] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-16 17:19:32] [UserID: 1] [Sections and Shelved]: User  deleted a section.
+[2025-08-16 17:19:46] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-16 17:20:17] [UserID: 1] [Employee Management]: User  added a new librarian.
+[2025-08-16 17:20:30] [UserID: 1] [Employee Management]: User  updated librarian tasks.
+[2025-08-16 17:20:53] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 17:21:21] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:25:33] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 17:30:34] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:38:12] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 17:38:25] [UserID: 11] [Book Interaction]: User  interacted with a book.
+[2025-08-16 17:49:58] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:50:17] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 17:56:44] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 17:56:53] [UserID: 1] [Employee Management]: User Admin User removed a librarian.
+[2025-08-16 17:56:54] [UserID: 1] [Employee Management]: User Admin User updated librarian tasks.
+[2025-08-16 17:57:12] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 18:06:43] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 18:07:15] [UserID: 1] [Employee Management]: User Admin User updated librarian tasks.
+[2025-08-16 18:07:26] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 18:14:30] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 19:11:51] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 19:16:31] [UserID: 11] [Login and SignUp]: User Tisha logged in.
+[2025-08-16 19:16:50] [UserID: 2] [Login and SignUp]: User AhsanAalok logged in.
+[2025-08-16 19:18:12] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 19:18:50] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-16 19:20:02] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 19:20:08] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 19:20:40] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 19:20:44] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-16 19:26:12] [UserID: 1] [Data Export]: Admin created a full database backup.
+[2025-08-17 20:04:42] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-17 20:06:11] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-17 20:06:15] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-17 20:24:00] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-17 20:31:28] [UserID: 1] [Sections and Shelved]: User Admin User added a new section.
+[2025-08-17 20:35:28] [UserID: 1] [Sections and Shelved]: User Admin User added a new shelf.
+[2025-08-17 20:35:42] [UserID: 1] [Sections and Shelved]: User Admin User added a new shelf.
+[2025-08-17 20:35:50] [UserID: 1] [Sections and Shelved]: User Admin User added a new shelf.
+[2025-08-17 20:39:00] [UserID: 1] [Book Management]: User Admin User added a new book.
+[2025-08-17 20:39:00] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 20:44:23] [UserID: 1] [Book Management]: User Admin User added a new book.
+[2025-08-17 20:44:21] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 20:44:29] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-17 20:44:37] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-17 20:52:33] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 20:52:33] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 20:54:37] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 20:54:37] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 20:58:14] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 20:58:15] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:00:12] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:00:12] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:02:25] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:02:25] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:10:38] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:10:39] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:16:54] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:16:58] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:17:14] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:17:28] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:18:45] [UserID: 1] [Sections and Shelved]: User  deleted a shelf.
+[2025-08-17 21:18:47] [UserID: 1] [Sections and Shelved]: User  deleted a shelf.
+[2025-08-17 21:18:52] [UserID: 1] [Sections and Shelved]: User  updated a shelf.
+[2025-08-17 21:18:54] [UserID: 1] [Sections and Shelved]: User  updated a shelf.
+[2025-08-17 21:21:21] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:21:21] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:23:36] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:23:44] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:23:48] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:27:26] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:27:26] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:27:58] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 21:28:10] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 21:28:46] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 21:29:32] [UserID: 1] [Sections and Shelved]: User  updated a section.
+[2025-08-17 21:33:57] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:34:02] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:34:06] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:34:09] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:35:38] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:35:38] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:39:32] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:39:32] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:41:31] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 21:42:16] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:42:20] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:43:46] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:43:46] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:44:00] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-17 21:44:11] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-17 21:44:45] [UserID: 1] [Book Interaction]: User  submitede a book review.
+[2025-08-17 21:44:47] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-17 21:44:50] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-17 21:46:47] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:46:47] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:49:53] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 21:50:23] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:50:28] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:51:59] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:52:00] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:53:43] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 21:53:43] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 21:58:43] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 21:58:47] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:58:57] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 21:59:37] [UserID: 1] [Sections and Shelved]: User  updated a section.
+[2025-08-17 21:59:52] [UserID: 1] [Sections and Shelved]: User  updated a section.
+[2025-08-17 22:01:22] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:01:22] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:03:01] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:03:02] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:05:44] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 22:06:06] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 22:06:12] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 22:07:09] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:07:09] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:08:52] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:08:52] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:13:32] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 22:13:44] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 22:13:49] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 22:15:13] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:15:13] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:20:21] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 22:20:27] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 22:21:19] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:21:19] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:22:37] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 22:24:38] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:24:39] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:27:44] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:27:45] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:35:47] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:35:47] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:38:14] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:38:15] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:41:43] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:41:43] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:44:29] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 22:46:07] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:46:07] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:47:41] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:47:41] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:50:26] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 22:51:24] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:51:24] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:55:40] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:55:41] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:57:39] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 22:57:39] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 22:58:40] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-17 22:59:23] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-17 23:00:00] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-17 23:01:59] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:01:59] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:04:59] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 23:05:11] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:07:28] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:07:28] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:13:02] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 23:13:11] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:15:11] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:15:12] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:15:46] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 23:15:57] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:16:06] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:16:10] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:16:19] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:18:35] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:18:36] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:19:37] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 23:20:45] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:20:45] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:23:50] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:23:50] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:25:47] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:25:47] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:29:22] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:32:06] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:32:06] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:33:40] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:34:51] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:34:51] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:35:49] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-17 23:36:02] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:37:10] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-17 23:37:18] [UserID: 1] [Sections and Shelved]: User  deleted a section.
+[2025-08-17 23:37:28] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:40:52] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:40:52] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:42:33] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-17 23:43:52] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:43:53] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:46:38] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:46:38] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:50:12] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:50:13] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:52:06] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:52:06] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-17 23:53:53] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-17 23:53:54] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:00:00] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 00:00:13] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:01:15] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:01:15] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:01:55] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:02:01] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:02:14] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:03:53] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:03:53] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:08:27] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:08:27] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:09:57] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:09:57] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:11:32] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:11:32] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:13:09] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:13:09] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:17:09] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 00:17:19] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:17:36] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:17:41] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:18:57] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:18:57] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:20:39] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:20:39] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:22:37] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:22:37] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:25:07] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:25:07] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:27:20] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:27:44] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:27:44] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:29:55] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:29:56] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:31:28] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:31:28] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:42:55] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 00:43:04] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 00:43:15] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 00:43:23] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 00:43:25] [UserID: 1] [Sections and Shelved]: User  updated a section.
+[2025-08-18 00:44:00] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:44:10] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 00:48:30] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:48:30] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:54:28] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:54:28] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:57:17] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:57:17] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:58:06] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:58:06] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 00:58:20] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-18 00:59:09] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 00:59:09] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:01:42] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:01:42] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:04:33] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:04:33] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:06:04] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:06:05] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:11:21] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:11:21] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:12:37] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:12:38] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:15:09] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:15:09] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:15:31] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-18 01:15:48] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-18 01:17:17] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:17:18] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:18:52] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:18:52] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:20:18] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:20:18] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:22:04] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:22:05] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:23:57] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:23:57] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:25:48] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:25:48] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:26:38] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:26:38] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:28:15] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:28:15] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:30:47] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:30:47] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:32:47] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:32:48] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:37:03] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:37:03] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:38:10] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:38:11] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:39:18] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:39:18] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:40:53] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 01:40:53] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 01:41:17] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:41:20] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:41:41] [UserID: 1] [Book Interaction]: User  submitede a book review.
+[2025-08-18 01:41:42] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:42:01] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:42:03] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:43:36] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:46:02] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:46:05] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:46:07] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:46:32] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-18 01:46:43] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:46:51] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:47:15] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-18 01:47:24] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:47:36] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:48:02] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 01:48:46] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-18 01:56:27] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 01:56:40] [UserID: 1] [Sections and Shelved]: User  deleted a section.
+[2025-08-18 01:56:56] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 02:07:51] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:07:52] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:12:59] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:12:59] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:14:39] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:14:39] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:15:39] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:15:39] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:17:27] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 02:18:13] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:18:13] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:19:43] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:19:43] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:21:15] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:21:15] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:22:41] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:22:41] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:23:00] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 02:24:48] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:24:48] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:26:24] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:26:25] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:27:31] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:27:29] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:28:53] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:28:54] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:30:24] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 02:30:39] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 02:30:57] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 02:31:04] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 02:32:10] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:32:11] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:35:26] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:35:26] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:37:24] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:37:24] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:38:54] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:38:54] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:44:42] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:44:42] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 02:57:33] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 02:57:34] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:01:33] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:01:34] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:02:49] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:02:49] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:04:24] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 03:06:04] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:06:05] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:07:27] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 03:07:42] [UserID: 1] [Sections and Shelved]: User  added a new shelf.
+[2025-08-18 03:09:13] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:09:14] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:10:44] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:10:44] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:11:51] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 03:12:51] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:12:51] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:14:04] [UserID: 1] [Sections and Shelved]: User  added a new section.
+[2025-08-18 03:16:09] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:16:10] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:17:02] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:17:02] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:18:02] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:18:02] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:20:41] [UserID: 1] [Book Management]: User  added a new book.
+[2025-08-18 03:20:42] [UserID: ] [Book Management]: User  Book Copies updated.
+[2025-08-18 03:22:16] [UserID: 101] [Login and SignUp]: User Librarian Mama signed up.
+[2025-08-18 03:23:17] [UserID: 102] [Login and SignUp]: User Shams Akbar Aalok signed up.
+[2025-08-18 03:23:39] [UserID: 102] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-18 03:23:41] [UserID: 102] [Book Interaction]: User  interacted with a book.
+[2025-08-18 03:25:59] [UserID: 3] [Login and SignUp]: User J. K. Rowling signed up.
+[2025-08-18 03:27:55] [UserID: 102] [Login and SignUp]: User Shams Akbar Aalok logged in.
+[2025-08-18 03:28:01] [UserID: 102] [Book Interaction]: User  interacted with a book.
+[2025-08-18 03:28:02] [UserID: 102] [Book Interaction]: User  interacted with a book.
+[2025-08-18 03:28:07] [UserID: 102] [Borrow and Reserve]: User  borrowed a book.
+[2025-08-18 03:28:07] [UserID: 102] [Book Interaction]: User  interacted with a book.
+[2025-08-18 03:28:24] [UserID: 3] [Login and SignUp]: User J. K. Rowling logged in.
+[2025-08-18 03:28:55] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-18 03:29:11] [UserID: ] [Book Management]: User  updated a book.
+[2025-08-18 03:29:16] [UserID: 3] [Login and SignUp]: User J. K. Rowling logged in.
+[2025-08-18 03:29:33] [UserID: 3] [Login and SignUp]: User J. K. Rowling logged in.
+[2025-08-18 03:29:39] [UserID: 1] [Login and SignUp]: User Admin User logged in.
+[2025-08-18 03:30:13] [UserID: 1] [Account Update]: User  updated their account information.
+[2025-08-18 03:30:20] [UserID: 1] [Data Export]: Admin created a full database backup.
+[2025-08-18 03:33:36] [UserID: 1] [Data Import]: Admin imported data from a SQL file.
+[2025-08-18 03:34:25] [UserID: 1] [Book Interaction]: User  interacted with a book.
+[2025-08-18 03:34:35] [UserID: 1] [Data Export]: Admin created a full database backup.
+[2025-08-18 03:34:45] [UserID: 1] [Data Import]: Admin imported data from a SQL file.

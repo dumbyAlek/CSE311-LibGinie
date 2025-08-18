@@ -8,10 +8,11 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true || $_SESSION
     exit;
 }
 
-$user_role = isset($_SESSION['membershipType']) ? $_SESSION['membershipType'] : 'guest';
+$user_role = $_SESSION['membershipType'];
 
 // Include database configuration
-require_once '../backend/crud/db_config.php';
+require_once 'crud/db_config.php';
+require_once 'crud/log_action.php';
 
 // Initialize messages
 $success_message = '';
@@ -70,6 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt_update_member->close();
 
                 $con->commit();
+                log_action($_SESSION['UserID'], 'Employee Management', 'User ' . $_SESSION['user_name'] . ' added a new librarian.');
                 $success_message = "New librarian added successfully!";
             } else {
                 $error_message = "User not found or is already an employee.";
@@ -95,6 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_update_section->close();
             
             $con->commit();
+            log_action($_SESSION['UserID'], 'Employee Management', 'User ' . $_SESSION['user_name'] . ' updated librarian tasks.');
             $success_message = "Librarian information updated successfully!";
         } catch (mysqli_sql_exception $e) {
             $con->rollback();
@@ -130,6 +133,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt_delete_employee->close();
             
             $con->commit();
+            log_action($_SESSION['UserID'], 'Employee Management', 'User ' . $_SESSION['user_name'] . ' removed a librarian.');
             $success_message = "Librarian account removed successfully!";
         } catch (mysqli_sql_exception $e) {
             $con->rollback();

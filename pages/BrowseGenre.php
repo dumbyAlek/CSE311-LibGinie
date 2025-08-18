@@ -279,6 +279,11 @@ $con->close();
             border-radius: 0 0 8px 8px;
         }
 
+        .active-suggestion {
+            background-color: #e0cdffff;
+            transform: translateY(-2px);
+        }
+
         .book-item:hover p {
             background-color: #f1f1f1;
         }
@@ -373,10 +378,54 @@ $con->close();
 
             updateBooksByGenre();
 
-            $('#genreSearchInput').on('keyup', function() {
+            let currentIndex = -1; // track which suggestion is highlighted
+
+            function highlightSuggestion(index) {
+                const suggestionsBox = $('#genreSuggestions');
+                const items = suggestionsBox.find('a');
+                items.removeClass('active-suggestion');
+                if (index >= 0 && index < items.length) {
+                    $(items[index]).addClass('active-suggestion');
+                    currentIndex = index;
+                }
+            }
+
+            $('#genreSearchInput').on('keydown', function(e) {
+                const suggestionsBox = $('#genreSuggestions');
+                const items = suggestionsBox.find('a');
+
+                if (items.length === 0) return;
+
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    currentIndex = (currentIndex + 1) % items.length;
+                    highlightSuggestion(currentIndex);
+                } 
+                else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    currentIndex = (currentIndex - 1 + items.length) % items.length;
+                    highlightSuggestion(currentIndex);
+                } 
+                else if (e.key === "Enter") {
+                    e.preventDefault();
+                    if (currentIndex >= 0) {
+                        $(items[currentIndex]).trigger('click');
+                    } else {
+                        $(items[0]).trigger('click');
+                    }
+                    suggestionsBox.hide();
+                    currentIndex = -1;
+                }
+            });
+
+            $('#genreSearchInput').on('keyup', function(e) {
+                // don’t rebuild on arrow keys or enter
+                if (["ArrowUp", "ArrowDown", "Enter"].includes(e.key)) return;
+
                 const query = $(this).val().toLowerCase();
                 const suggestionsBox = $('#genreSuggestions');
                 suggestionsBox.empty();
+                currentIndex = -1; // reset highlight
 
                 if (query.length > 0) {
                     const filteredGenres = allGenres.filter(g => g.GenreName.toLowerCase().includes(query));
@@ -384,11 +433,12 @@ $con->close();
                         suggestionsBox.show();
                         filteredGenres.forEach(genre => {
                             const suggestionItem = $(`<a href="#">${genre.GenreName}</a>`);
-                            suggestionItem.on('click', function(e) {
-                                e.preventDefault();
+                            suggestionItem.on('click', function(ev) {
+                                ev.preventDefault();
                                 addGenreTag(genre.GenreID.toString(), genre.GenreName);
                                 $('#genreSearchInput').val('');
                                 suggestionsBox.hide();
+                                currentIndex = -1;
                             });
                             suggestionsBox.append(suggestionItem);
                         });
